@@ -1,0 +1,300 @@
+import { useState, useEffect } from 'react'
+import { Users, TrendingUp, Bitcoin, Check, ArrowRight, Info } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import useAuthStore from '../store/authStore'
+import ConfirmInvestmentModal from '../components/ConfirmInvestmentModal'
+import NavBar from '../components/NavBar'
+import secureStorage from '../utils/storage'
+
+const SelectPack = () => {
+  const navigate = useNavigate()
+  const { user, isAuthenticated } = useAuthStore()
+  
+  const [activePack, setActivePack] = useState(null)
+  const [showModal, setShowModal] = useState(false)
+  const [tradingAmount, setTradingAmount] = useState(50000)
+  const [cryptoAmount, setCryptoAmount] = useState(100000)
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login')
+    }
+  }, [isAuthenticated, navigate])
+
+  // Calculate weekly earnings for Trading
+  const calculateWeeklyEarnings = (amount) => {
+    return Math.floor(amount * 0.10)
+  }
+
+  // Calculate monthly projected earnings for Trading
+  const calculateMonthlyEarnings = (amount) => {
+    return Math.floor(calculateWeeklyEarnings(amount) * 4)
+  }
+
+  // Calculate crypto return
+  const calculateCryptoReturn = (amount) => {
+    return amount * 3
+  }
+
+  const handleSelectPack = (packType, amount = null) => {
+    setActivePack({
+      type: packType,
+      amount: amount
+    })
+    setShowModal(true)
+  }
+
+  const handleConfirmInvest = async (paymentData) => {
+    // Save investment to IndexedDB
+    try {
+      const investment = {
+        id: Date.now().toString(),
+        userId: user.id,
+        packType: activePack.type,
+        amount: activePack.amount,
+        status: 'pendiente_verificacion',
+        createdAt: new Date().toISOString(),
+        paymentMethod: paymentData.paymentMethod,
+        proofUploaded: paymentData.proofUploaded,
+        ...paymentData
+      }
+
+      // Get existing investments
+      const investments = await secureStorage.getItem('investments') || []
+      await secureStorage.setItem('investments', [...investments, investment])
+
+      // Update user data
+      const users = await secureStorage.getItem('users') || []
+      const updatedUsers = users.map(u => {
+        if (u.id === user.id) {
+          return {
+            ...u,
+            invested: (u.invested || 0) + investment.amount
+          }
+        }
+        return u
+      })
+      await secureStorage.setItem('users', updatedUsers)
+
+      // Close modal and redirect
+      setShowModal(false)
+      navigate('/dashboard?success=investment')
+    } catch (error) {
+      console.error('Error saving investment:', error)
+    }
+  }
+
+  if (!isAuthenticated) {
+    return null
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      {/* Navigation Bar */}
+      <NavBar />
+      
+      <div className="pt-24 pb-20 px-4">
+        <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-black mb-4">
+            Selecciona tu <span className="gradient-text">Pack de Inversión</span>
+          </h1>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            Elige la opción que mejor se adapte a tus objetivos financieros
+          </p>
+        </div>
+
+        {/* Pack Cards Grid */}
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* PACK INICIO */}
+          <div className="card hover:scale-105 transition-transform duration-300">
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Users className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold mb-2">Pack Inicio</h2>
+              <div className="inline-block px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent font-black text-4xl">
+                Gratis
+              </div>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div className="flex items-start gap-3 p-4 bg-blue-500/10 rounded-lg">
+                <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold mb-1">Objetivo</p>
+                  <p className="text-sm text-gray-300">Invitar 10 amigos a la plataforma</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-4 bg-emerald-500/10 rounded-lg">
+                <Info className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold mb-1">Recompensa</p>
+                  <p className="text-sm text-gray-300">10,000 CLP al completar</p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => handleSelectPack('inicio', 0)}
+              className="w-full py-4 px-6 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all flex items-center justify-center gap-2"
+            >
+              Seleccionar Pack Inicio
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* PACK TRADING */}
+          <div className="card hover:scale-105 transition-transform duration-300 border-2 border-green-money/30">
+            <div className="absolute top-4 right-4 bg-gradient-to-r from-gold to-yellow-500 text-gray-900 font-bold px-3 py-1 rounded-full text-xs">
+              ⭐ Popular
+            </div>
+
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-green-money to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold mb-2">Pack Trading</h2>
+              <div className="text-2xl font-semibold text-green-money">
+                10% semanal
+              </div>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              {/* Investment Amount Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Monto de Inversión
+                </label>
+                <input
+                  type="number"
+                  min="50000"
+                  step="10000"
+                  value={tradingAmount}
+                  onChange={(e) => setTradingAmount(Math.max(50000, parseInt(e.target.value) || 50000))}
+                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:outline-none focus:border-green-money text-white text-lg font-bold"
+                />
+                <p className="text-xs text-gray-500 mt-1">Mínimo: 50,000 CLP</p>
+              </div>
+
+              {/* Calculator */}
+              <div className="p-4 bg-gradient-to-br from-green-money/10 to-emerald-600/10 rounded-lg border border-green-money/20">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-300">Ganancia Semanal:</span>
+                    <span className="text-xl font-bold text-green-money">
+                      ${calculateWeeklyEarnings(tradingAmount).toLocaleString('es-CL')} CLP
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-300">Proyección Mensual:</span>
+                    <span className="text-xl font-bold text-emerald-400">
+                      ${calculateMonthlyEarnings(tradingAmount).toLocaleString('es-CL')} CLP
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => handleSelectPack('trading', tradingAmount)}
+              className="w-full py-4 px-6 bg-gradient-to-r from-green-money to-emerald-600 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-green-money/50 transition-all flex items-center justify-center gap-2"
+            >
+              Invertir en Trading
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* PACK CRYPTO */}
+          <div className="card hover:scale-105 transition-transform duration-300">
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Bitcoin className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold mb-2">Pack Crypto</h2>
+              <div className="text-2xl font-semibold text-purple-400">
+                Multiplica x3
+              </div>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              {/* Investment Amount Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Monto de Inversión
+                </label>
+                <input
+                  type="number"
+                  min="100000"
+                  step="50000"
+                  value={cryptoAmount}
+                  onChange={(e) => setCryptoAmount(Math.max(100000, parseInt(e.target.value) || 100000))}
+                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:outline-none focus:border-purple-500 text-white text-lg font-bold"
+                />
+                <p className="text-xs text-gray-500 mt-1">Mínimo: 100,000 CLP</p>
+              </div>
+
+              {/* Calculator */}
+              <div className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-300">Plazo:</span>
+                    <span className="text-lg font-bold text-purple-400">2 meses</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-300">Retorno Esperado:</span>
+                    <span className="text-xl font-bold text-pink-400">
+                      ${calculateCryptoReturn(cryptoAmount).toLocaleString('es-CL')} CLP
+                    </span>
+                  </div>
+                  <div className="pt-2 border-t border-purple-500/20">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-400">Ganancia neta:</span>
+                      <span className="text-lg font-bold text-white">
+                        ${(calculateCryptoReturn(cryptoAmount) - cryptoAmount).toLocaleString('es-CL')} CLP
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => handleSelectPack('crypto', cryptoAmount)}
+              className="w-full py-4 px-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-purple-500/50 transition-all flex items-center justify-center gap-2"
+            >
+              Invertir en Crypto
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Info Section */}
+        <div className="mt-12 p-6 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+          <div className="flex items-start gap-3">
+            <Info className="w-6 h-6 text-blue-400 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-gray-300">
+              <p className="font-semibold mb-1 text-blue-400">Información Importante</p>
+              <p>Todas las inversiones están sujetas a verificación. Una vez confirmado el pago, tu inversión será activada y podrás comenzar a generar retornos.</p>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      {/* Confirmation Modal */}
+      {showModal && (
+        <ConfirmInvestmentModal
+          pack={activePack}
+          onConfirm={handleConfirmInvest}
+          onClose={() => setShowModal(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+export default SelectPack
+
