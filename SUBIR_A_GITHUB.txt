@@ -24,8 +24,13 @@ Copia esa URL completa (reemplaza TU-USUARIO-GITHUB con tu usuario real)
 ──────────────────────────────────
 Abre PowerShell en esta carpeta y ejecuta estos comandos:
 
+   # Si ya existe remote, elimínalo primero:
+   git remote remove origin
+   
+   # Agregar nuevo remote
    git remote add origin https://github.com/TU-USUARIO-GITHUB/reto-rico-pwa.git
    
+   # Subir proyecto
    git push -u origin main
 
 
