@@ -6,6 +6,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import Dashboard from './pages/Dashboard'
 import SelectPack from './pages/SelectPack'
 import Referrals from './pages/Referrals'
+import Withdrawals from './pages/Withdrawals'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -37,6 +38,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Referrals />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/withdrawals"
+          element={
+            <ProtectedRoute>
+              <Withdrawals />
             </ProtectedRoute>
           }
         />
