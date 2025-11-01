@@ -1,0 +1,67 @@
+═══════════════════════════════════════════════════════════════
+  ¡CREDENCIALES CONFIGURADAS CORRECTAMENTE! ✅
+═══════════════════════════════════════════════════════════════
+
+Tu archivo .env está creado con:
+✅ URL de Supabase configurada
+✅ Anon Key configurada
+✅ Conexión verificada exitosamente
+
+
+═══════════════════════════════════════════════════════════════
+  SIGUIENTE PASO: EJECUTAR SQL EN SUPABASE
+═══════════════════════════════════════════════════════════════
+
+1. Abre tu proyecto en Supabase:
+   https://app.supabase.com/project/sopvzvcfswxvpytsvner
+
+2. En el menú lateral, click en:
+   "SQL Editor"
+
+3. Click en el botón:
+   "New Query"
+
+4. Abre el archivo en tu editor:
+   SUPABASE_SQL.sql
+   
+5. Selecciona TODO el contenido (Ctrl+A)
+   
+6. Copia (Ctrl+C)
+   
+7. Pégalo en el editor de Supabase
+   
+8. Click en el botón "Run"
+   
+9. Espera a que termine
+   
+10. Verifica que dice "Success"
+
+
+═══════════════════════════════════════════════════════════════
+  DESPUÉS DE EJECUTAR SQL
+═══════════════════════════════════════════════════════════════
+
+1. Verifica las tablas:
+   - Ve a "Table Editor"
+   - Debe haber 4 tablas:
+     * profiles
+     * investments
+     * activities
+     * commissions
+
+2. Reinicia tu servidor:
+   npm run dev
+
+3. Prueba la app:
+   - Ve a http://localhost:5173
+   - Click "Registrarse"
+   - Completa el formulario
+   - Verifica en Supabase que aparezca el usuario
+
+
+═══════════════════════════════════════════════════════════════
+
+✅ ¡Ejecuta el SQL y listo para usar Supabase!
+
+═══════════════════════════════════════════════════════════════
+
