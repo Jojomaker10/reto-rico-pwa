@@ -1,0 +1,43 @@
+INSTRUCCIONES PARA SUBIR EL PROYECTO A GITHUB
+================================================
+
+PASO 1: Crear repositorio en GitHub Web
+----------------------------------------
+1. Abre tu navegador
+2. Ve a: https://github.com
+3. Inicia sesión
+4. Click en el botón "+" (arriba derecha)
+5. Selecciona "New repository"
+6. Nombre: reto-rico-pwa
+7. Visibility: Public o Private
+8. NO marques "Initialize with README"
+9. Click "Create repository"
+
+
+PASO 2: Copiar tu URL de GitHub
+--------------------------------
+GitHub te mostrará una URL como:
+https://github.com/TU-USUARIO/reto-rico-pwa.git
+
+Copia esta URL (reemplaza TU-USUARIO con tu usuario real)
+
+
+PASO 3: Ejecutar estos comandos en la terminal
+-----------------------------------------------
+(Reemplaza TU-USUARIO con tu usuario de GitHub)
+
+git remote add origin https://github.com/TU-USUARIO/reto-rico-pwa.git
+git branch -M main
+git push -u origin main
+
+
+¡LISTO! Tu proyecto estará en GitHub 🎉
+
+
+¿PROBLEMAS?
+-----------
+Si te pide autenticación:
+- Descarga GitHub Desktop
+- O configura SSH keys
+- O usa Personal Access Token
+
