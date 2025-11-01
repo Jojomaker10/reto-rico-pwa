@@ -39,17 +39,15 @@ const useAuthStore = create((set, get) => ({
   // Register new user with Supabase Auth + Profile
   register: async (userData) => {
     try {
-      // Generate unique referral code
-      const referralCode = Math.random().toString(36).substring(2, 8).toUpperCase()
-
-      // Create auth user in Supabase
+      // Create auth user in Supabase (trigger will create profile automatically)
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
         options: {
           data: {
             name: userData.name,
-            phone: userData.phone
+            phone: userData.phone,
+            referredBy: userData.referredBy || null
           }
         }
       })
@@ -58,26 +56,63 @@ const useAuthStore = create((set, get) => ({
         return { success: false, error: authError.message }
       }
 
-      // Create profile in database
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: authData.user.id,
-            name: userData.name,
-            email: userData.email,
-            phone: userData.phone,
-            referral_code: referralCode,
-            referred_by: userData.referredBy || null
-          }
-        ])
-        .select()
-        .single()
+      // Wait a bit for the trigger to create the profile
+      // Retry up to 5 times with increasing delay
+      let profile = null
+      let profileError = null
+      
+      for (let i = 0; i < 5; i++) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
+        
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authData.user.id)
+          .single()
+        
+        if (data && !error) {
+          profile = data
+          profileError = null
+          break
+        }
+        profileError = error
+      }
 
-      if (profileError) {
-        // Rollback: delete auth user if profile creation fails
-        await supabase.auth.admin.deleteUser(authData.user.id)
-        return { success: false, error: profileError.message }
+      // If profile still not found, trigger might have failed
+      // Try to create it manually as fallback
+      if (profileError || !profile) {
+        console.error('Profile not found after retries, trying manual creation...')
+        console.log('User ID:', authData.user.id)
+        console.log('User email:', authData.user.email)
+        
+        // Generate referral code
+        const referralCode = Math.random().toString(36).substring(2, 8).toUpperCase()
+        
+        // Try to create profile manually
+        const { data: manualProfile, error: manualError } = await supabase
+          .from('profiles')
+          .insert([
+            {
+              id: authData.user.id,
+              name: userData.name,
+              email: userData.email,
+              phone: userData.phone,
+              referral_code: referralCode,
+              referred_by: userData.referredBy || null
+            }
+          ])
+          .select()
+          .single()
+        
+        if (manualError || !manualProfile) {
+          console.error('Manual profile creation also failed:', manualError)
+          return { 
+            success: false, 
+            error: `Error creating profile: ${manualError?.message || 'Profile creation failed'}` 
+          }
+        }
+        
+        profile = manualProfile
       }
 
       // If user was referred, update referrer's count
@@ -88,7 +123,7 @@ const useAuthStore = create((set, get) => ({
       }
 
       set({ 
-        user: profile, 
+        user: { ...profile, email: authData.user.email }, 
         isAuthenticated: true,
         rememberMe: false 
       })

@@ -5,7 +5,7 @@ import {
   Award, Calendar, Package, Eye, Download
 } from 'lucide-react'
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import useAuthStore from '../store/authStore'
+import useAuthStore from '../store/authStoreSupabase'
 import secureStorage from '../utils/storage'
 
 const Referrals = () => {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Mail, Lock, Eye, EyeOff, DollarSign } from 'lucide-react'
-import useAuthStore from '../store/authStore'
+import useAuthStore from '../store/authStoreSupabase'
 
 const Login = () => {
   const navigate = useNavigate()

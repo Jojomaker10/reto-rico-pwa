@@ -6,7 +6,7 @@ import {
   BarChart3, Activity, Plus
 } from 'lucide-react'
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import useAuthStore from '../store/authStore'
+import useAuthStore from '../store/authStoreSupabase'
 import secureStorage from '../utils/storage'
 
 const Dashboard = () => {

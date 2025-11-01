@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Users, TrendingUp, Bitcoin, Check, ArrowRight, Info } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import useAuthStore from '../store/authStore'
+import useAuthStore from '../store/authStoreSupabase'
 import ConfirmInvestmentModal from '../components/ConfirmInvestmentModal'
 import NavBar from '../components/NavBar'
 import secureStorage from '../utils/storage'
