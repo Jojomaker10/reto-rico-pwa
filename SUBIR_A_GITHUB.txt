@@ -1,0 +1,94 @@
+════════════════════════════════════════════════════════════════
+  RETO-RICO PWA - INSTRUCCIONES PARA SUBIR A GITHUB
+════════════════════════════════════════════════════════════════
+
+✅ PASO 1: Crear Repositorio en GitHub
+────────────────────────────────────────
+1. Abre tu navegador y ve a: https://github.com/new
+2. Nombre del repositorio: reto-rico-pwa
+3. Descripción: Progressive Web App para generar ingresos
+4. Visibility: Public o Private (tu elección)
+5. IMPORTANTE: NO marques "Initialize with README"
+6. Haz clic en "Create repository"
+
+
+✅ PASO 2: Copiar tu URL de GitHub
+────────────────────────────────────
+Después de crear el repositorio, GitHub te mostrará una URL como:
+https://github.com/TU-USUARIO-GITHUB/reto-rico-pwa.git
+
+Copia esa URL completa (reemplaza TU-USUARIO-GITHUB con tu usuario real)
+
+
+✅ PASO 3: Ejecutar los comandos
+──────────────────────────────────
+Abre PowerShell en esta carpeta y ejecuta estos comandos:
+
+   git remote add origin https://github.com/TU-USUARIO-GITHUB/reto-rico-pwa.git
+   
+   git push -u origin main
+
+
+¡LISTO! Tu proyecto estará en GitHub 🎉
+
+
+════════════════════════════════════════════════════════════════
+  ¿PROBLEMAS DE AUTENTICACIÓN?
+════════════════════════════════════════════════════════════════
+
+Si Git te pide usuario y contraseña:
+
+OPCIÓN 1: Usar GitHub Desktop
+  1. Descarga GitHub Desktop desde: desktop.github.com
+  2. Instala y conecta con tu cuenta GitHub
+  3. File → Add Local Repository
+  4. Selecciona esta carpeta
+  5. Publish repository
+
+OPCIÓN 2: Personal Access Token
+  1. GitHub → Settings → Developer settings
+  2. Personal access tokens → Tokens (classic)
+  3. Generate new token
+  4. Selecciona: repo (full control)
+  5. Copia el token
+  6. Usa el token como contraseña al hacer push
+
+OPCIÓN 3: Configurar SSH
+  git config --global credential.helper manager-core
+
+
+════════════════════════════════════════════════════════════════
+  ESTADO ACTUAL DEL PROYECTO
+════════════════════════════════════════════════════════════════
+
+✅ 3 commits realizados
+✅ 41 archivos listos
+✅ 13,829+ líneas de código
+✅ Repositorio inicializado
+✅ Rama main configurada
+✅ .gitignore configurado
+✅ Todo listo para subir
+
+
+════════════════════════════════════════════════════════════════
+  DESPUÉS DE SUBIR A GITHUB
+════════════════════════════════════════════════════════════════
+
+1. Agregar Topics/Etiquetas:
+   - react
+   - pwa
+   - vite
+   - tailwindcss
+   - fintech
+   - investment
+
+2. (Opcional) Configurar GitHub Pages:
+   - Settings → Pages
+   - Source: main / dist
+   - Deploy PWA
+
+3. Compartir tu proyecto!
+
+
+════════════════════════════════════════════════════════════════
+
