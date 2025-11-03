@@ -132,7 +132,7 @@ const SelectPack = () => {
                 <Info className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-semibold mb-1">Recompensa</p>
-                  <p className="text-sm text-gray-300">10,000 CLP al completar</p>
+                  <p className="text-sm text-gray-300">Recompensa en USDT al completar</p>
                 </div>
               </div>
             </div>
@@ -176,23 +176,19 @@ const SelectPack = () => {
                   onChange={(e) => setTradingAmount(Math.max(50000, parseInt(e.target.value) || 50000))}
                   className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:outline-none focus:border-green-money text-white text-lg font-bold"
                 />
-                <p className="text-xs text-gray-500 mt-1">Mínimo: 50,000 CLP</p>
+                <p className="text-xs text-gray-500 mt-1">Depósitos: solo USDT TRC20</p>
               </div>
 
               {/* Calculator */}
               <div className="p-4 bg-gradient-to-br from-green-money/10 to-emerald-600/10 rounded-lg border border-green-money/20">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-300">Ganancia Semanal:</span>
-                    <span className="text-xl font-bold text-green-money">
-                      ${calculateWeeklyEarnings(tradingAmount).toLocaleString('es-CL')} CLP
-                    </span>
+                    <span className="text-sm text-gray-300">Ganancia Semanal (equiv. USD):</span>
+                    <span className="text-xl font-bold text-green-money">Estimación</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-300">Proyección Mensual:</span>
-                    <span className="text-xl font-bold text-emerald-400">
-                      ${calculateMonthlyEarnings(tradingAmount).toLocaleString('es-CL')} CLP
-                    </span>
+                    <span className="text-sm text-gray-300">Proyección Mensual (equiv. USD):</span>
+                    <span className="text-xl font-bold text-emerald-400">Estimación</span>
                   </div>
                 </div>
               </div>
@@ -233,7 +229,7 @@ const SelectPack = () => {
                   onChange={(e) => setCryptoAmount(Math.max(100000, parseInt(e.target.value) || 100000))}
                   className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:outline-none focus:border-purple-500 text-white text-lg font-bold"
                 />
-                <p className="text-xs text-gray-500 mt-1">Mínimo: 100,000 CLP</p>
+                <p className="text-xs text-gray-500 mt-1">Depósitos: solo USDT TRC20</p>
               </div>
 
               {/* Calculator */}
@@ -244,17 +240,13 @@ const SelectPack = () => {
                     <span className="text-lg font-bold text-purple-400">2 meses</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-300">Retorno Esperado:</span>
-                    <span className="text-xl font-bold text-pink-400">
-                      ${calculateCryptoReturn(cryptoAmount).toLocaleString('es-CL')} CLP
-                    </span>
+                    <span className="text-sm text-gray-300">Retorno Esperado (equiv. USD):</span>
+                    <span className="text-xl font-bold text-pink-400">Estimación</span>
                   </div>
                   <div className="pt-2 border-t border-purple-500/20">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-400">Ganancia neta:</span>
-                      <span className="text-lg font-bold text-white">
-                        ${(calculateCryptoReturn(cryptoAmount) - cryptoAmount).toLocaleString('es-CL')} CLP
-                      </span>
+                      <span className="text-lg font-bold text-white">Estimación (equiv. USD)</span>
                     </div>
                   </div>
                 </div>

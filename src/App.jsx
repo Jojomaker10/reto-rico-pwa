@@ -51,7 +51,7 @@ function App() {
           path="/withdrawals"
           element={
             <ProtectedRoute>
-              <Withdrawals />
+              <Withdraw />
             </ProtectedRoute>
           }
         />

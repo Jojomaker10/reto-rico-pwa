@@ -23,7 +23,7 @@ const Home = () => {
       gradient: 'from-blue-500 to-cyan-500',
       price: 'Gratis',
       description: 'Invita 10 amigos y gana',
-      amount: '10,000 CLP',
+      amount: 'Recompensa en USDT',
       features: [
         'Sin inversión inicial',
         'Registro completamente gratuito',
@@ -54,8 +54,8 @@ const Home = () => {
       title: 'Pack Crypto',
       icon: Bitcoin,
       gradient: 'from-purple-500 to-pink-500',
-      price: 'Mínimo 100K',
-      description: 'Deposita y multiplica x3',
+      price: 'Solo USDT TRC20',
+      description: 'Deposita en USDT y multiplica x3',
       amount: 'x3 en 2 meses',
       features: [
         'Depósito mínimo 100,000 CLP',

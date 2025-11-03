@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { X, Check, Upload, Users, TrendingUp, Bitcoin, Banknote, FileText } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { X, Check, Upload, Users, TrendingUp, Bitcoin } from 'lucide-react'
 
 const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
-  const [paymentMethod, setPaymentMethod] = useState('transfer')
-  const [bankInfoVisible, setBankInfoVisible] = useState(true)
+  const navigate = useNavigate()
   const [uploadedFile, setUploadedFile] = useState(null)
   const [fileName, setFileName] = useState('')
 
@@ -63,14 +63,7 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
 
   const Icon = packInfo.icon
 
-  // Bank account info
-  const bankDetails = {
-    name: 'Banco Estado',
-    accountNumber: '1234567890',
-    accountType: 'Cuenta Corriente',
-    rut: '77.777.777-7',
-    email: 'pagos@reto-rico.com'
-  }
+  // Depósitos únicamente en USDT (TRC20)
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -122,112 +115,13 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
           </div>
 
           {/* Payment Method */}
-          {pack.amount > 0 && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-3">
-                  Método de Pago
-                </label>
-                <div className="space-y-2">
-                  <button
-                    onClick={() => setPaymentMethod('transfer')}
-                    className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-3 ${
-                      paymentMethod === 'transfer'
-                        ? 'border-green-money bg-green-money/10'
-                        : 'border-gray-700 hover:border-gray-600'
-                    }`}
-                  >
-                    <Banknote className={`w-6 h-6 ${paymentMethod === 'transfer' ? 'text-green-money' : 'text-gray-400'}`} />
-                    <div className="text-left">
-                      <p className="font-semibold">Transferencia Bancaria</p>
-                      <p className="text-sm text-gray-400">Datos de la empresa</p>
-                    </div>
-                  </button>
-                </div>
+            {pack.amount > 0 && (
+              <div className="p-6 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                <p className="font-semibold text-emerald-400 mb-2">Depósito en USDT (TRC20)</p>
+                <p className="text-sm text-gray-300 mb-4">Los depósitos se realizan exclusivamente en USDT. Genera tu dirección y escanea el QR en la sección de Depósitos.</p>
+                <button onClick={() => navigate('/deposit')} className="btn-primary">Ir a Depositar (USDT)</button>
               </div>
-
-              {/* Bank Details */}
-              {paymentMethod === 'transfer' && (
-                <div className="p-6 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-                  <div className="flex items-center gap-2 mb-4">
-                    <FileText className="w-5 h-5 text-blue-400" />
-                    <h4 className="font-semibold text-blue-400">Datos Bancarios</h4>
-                  </div>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400">Banco:</span>
-                      <span className="text-gray-200 font-medium">{bankDetails.name}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400">N° Cuenta:</span>
-                      <span className="text-gray-200 font-medium font-mono">{bankDetails.accountNumber}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400">Tipo:</span>
-                      <span className="text-gray-200 font-medium">{bankDetails.accountType}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400">RUT:</span>
-                      <span className="text-gray-200 font-medium font-mono">{bankDetails.rut}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400">Email:</span>
-                      <span className="text-gray-200 font-medium">{bankDetails.email}</span>
-                    </div>
-                    <div className="pt-3 mt-3 border-t border-blue-500/20">
-                      <div className="flex justify-between items-center">
-                        <span className="text-blue-400 font-semibold">Monto:</span>
-                        <span className="text-xl font-black text-blue-400">
-                          ${pack.amount.toLocaleString('es-CL')} CLP
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      const bankInfo = `Banco: ${bankDetails.name}\nN° Cuenta: ${bankDetails.accountNumber}\nTipo: ${bankDetails.accountType}\nRUT: ${bankDetails.rut}\nMonto: $${pack.amount.toLocaleString('es-CL')} CLP`
-                      navigator.clipboard.writeText(bankInfo)
-                      alert('Información bancaria copiada')
-                    }}
-                    className="mt-4 w-full py-2 px-4 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors text-sm font-medium"
-                  >
-                    Copiar información bancaria
-                  </button>
-                </div>
-              )}
-
-              {/* Upload Proof */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-3">
-                  Subir Comprobante de Pago
-                </label>
-                <div className="border-2 border-dashed border-gray-700 rounded-xl p-6 hover:border-green-money transition-colors">
-                  <input
-                    type="file"
-                    id="proofUpload"
-                    onChange={handleFileUpload}
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    className="hidden"
-                  />
-                  <label htmlFor="proofUpload" className="cursor-pointer">
-                    {uploadedFile ? (
-                      <div className="text-center">
-                        <Check className="w-12 h-12 text-green-money mx-auto mb-2" />
-                        <p className="font-semibold text-green-money">{fileName}</p>
-                        <p className="text-sm text-gray-400 mt-1">Archivo cargado</p>
-                      </div>
-                    ) : (
-                      <div className="text-center">
-                        <Upload className="w-12 h-12 text-gray-500 mx-auto mb-2" />
-                        <p className="font-semibold mb-1">Haz clic para subir</p>
-                        <p className="text-sm text-gray-500">PDF, JPG o PNG (máx. 5MB)</p>
-                      </div>
-                    )}
-                  </label>
-                </div>
-              </div>
-            </>
-          )}
+            )}
         </div>
 
         {/* Footer */}
