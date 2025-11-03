@@ -110,9 +110,6 @@ const Footer = () => {
             <p>
               © {new Date().getFullYear()} Reto-Rico. Todos los derechos reservados.
             </p>
-            <p className="flex items-center gap-2">
-              Hecho con <span className="text-red-500">♥</span> en Chile
-            </p>
           </div>
         </div>
       </div>
