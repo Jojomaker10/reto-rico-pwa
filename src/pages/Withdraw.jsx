@@ -3,7 +3,7 @@ import axios from 'axios'
 
 export default function Withdraw() {
   const [address, setAddress] = useState('')
-  const [amountUSD, setAmountUSD] = useState('')
+  const [amountUSDT, setAmountUSDT] = useState('')
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
@@ -17,11 +17,11 @@ export default function Withdraw() {
     try {
       await axios.post('/api/withdrawals/request', {
         address,
-        amount_usd: Number(amountUSD),
+        amount_usdt: Number(amountUSDT),
         code,
       }, { headers: { 'x-user-id': 'demo-user' } })
       setMsg('Solicitud enviada. Pendiente de aprobación.')
-      setAddress(''); setAmountUSD(''); setCode('')
+      setAddress(''); setAmountUSDT(''); setCode('')
     } catch (e) {
       setErr(e.response?.data?.error || 'Error')
     } finally { setLoading(false) }
@@ -33,7 +33,7 @@ export default function Withdraw() {
       {msg && <p className="text-emerald-400">{msg}</p>}
       {err && <p className="text-red-400">{err}</p>}
       <input className="w-full p-3 rounded bg-gray-800" placeholder="Dirección TRON (TRC20)" value={address} onChange={e=>setAddress(e.target.value)} />
-      <input className="w-full p-3 rounded bg-gray-800" placeholder="Monto en USD" value={amountUSD} onChange={e=>setAmountUSD(e.target.value)} />
+      <input className="w-full p-3 rounded bg-gray-800" placeholder="Monto en USDT" value={amountUSDT} onChange={e=>setAmountUSDT(e.target.value)} />
       <input className="w-full p-3 rounded bg-gray-800" placeholder="Código 2FA / Email" value={code} onChange={e=>setCode(e.target.value)} />
       <button className="btn-primary" disabled={loading}>{loading ? 'Enviando...' : 'Solicitar Retiro'}</button>
     </form>

@@ -7,8 +7,8 @@ import { isValidTronAddress, sendUSDT } from '../services/blockchain/tron.servic
 export const requestWithdrawal = async (req, res) => {
   const userId = req.user?.id || req.headers['x-user-id']
   if (!userId) return res.status(401).json({ error: 'No autorizado' })
-  const { address, amount_usd } = req.body || {}
-  if (!address || !amount_usd) return res.status(400).json({ error: 'Datos inválidos' })
+  const { address, amount_usdt } = req.body || {}
+  if (!address || !amount_usdt) return res.status(400).json({ error: 'Datos inválidos' })
 
   const user = await User.findByPk(userId)
   if (!user) return res.status(404).json({ error: 'Usuario no encontrado' })
@@ -17,16 +17,22 @@ export const requestWithdrawal = async (req, res) => {
   const fee = Number(process.env.WITHDRAW_FEE_USDT || 1.2)
 
   if (!isValidTronAddress(address)) return res.status(400).json({ error: 'Dirección TRON inválida' })
-  if (Number(user.balance_usd) < Number(amount_usd)) return res.status(400).json({ error: 'Saldo insuficiente' })
 
+  const normalized = Number(amount_usdt)
+  if (Number.isNaN(normalized) || normalized <= 0) return res.status(400).json({ error: 'Monto USDT inválido' })
+  if (normalized < min) return res.status(400).json({ error: `Monto mínimo de retiro: ${min} USDT` })
+
+  // Convertir a USD solo para referenciar en historial/UI
   const rate = await getUSDTtoUSD()
-  const amount_usdt = Number(amount_usd) / rate
-  if (amount_usdt < min) return res.status(400).json({ error: `Monto mínimo de retiro: ${min} USDT` })
+  const amount_usd = normalized * rate
+
+  // Validar saldo en USD equivalente
+  if (Number(user.balance_usd) < amount_usd) return res.status(400).json({ error: 'Saldo insuficiente' })
 
   const wd = await Withdrawal.create({
     user_id: user.id,
     wallet_address_destination: address,
-    amount_usdt,
+    amount_usdt: normalized,
     amount_usd,
     fee,
     status: 'requested',
