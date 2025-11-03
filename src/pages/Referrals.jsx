@@ -226,9 +226,9 @@ Usa mi código de referido: ${user?.referralCode}
             </div>
             <h3 className="text-sm text-gray-400 mb-1">Total Ganado</h3>
             <p className="text-3xl font-black gradient-text">
-              ${stats.totalEarned.toLocaleString('es-CL')}
+              {Number(stats.totalEarned || 0).toFixed(6)} USDT
             </p>
-            <p className="text-xs text-gray-500 mt-1">CLP</p>
+            <p className="text-xs text-gray-500 mt-1">Equivalente USD en UI</p>
           </div>
 
           <div className="card hover:scale-105 transition-transform">
@@ -240,9 +240,9 @@ Usa mi código de referido: ${user?.referralCode}
             </div>
             <h3 className="text-sm text-gray-400 mb-1">Por Cobrar</h3>
             <p className="text-3xl font-black text-gold">
-              ${stats.pending.toLocaleString('es-CL')}
+              {Number(stats.pending || 0).toFixed(6)} USDT
             </p>
-            <p className="text-xs text-gray-500 mt-1">CLP</p>
+            <p className="text-xs text-gray-500 mt-1">Equivalente USD en UI</p>
           </div>
         </div>
 
@@ -443,12 +443,12 @@ Usa mi código de referido: ${user?.referralCode}
                       </td>
                       <td className="py-4 px-4">
                         <span className="text-sm font-medium text-white">
-                          ${ref.investment?.amount?.toLocaleString('es-CL') || '0'} CLP
+                          {ref.investment ? Number(ref.investment.amount || 0).toFixed(6) : '0'} USDT
                         </span>
                       </td>
                       <td className="py-4 px-4">
                         <span className="text-sm font-bold text-green-money">
-                          ${ref.investment ? Math.floor(ref.investment.amount * 0.10).toLocaleString('es-CL') : '0'} CLP
+                          {ref.investment ? (ref.investment.amount * 0.10).toFixed(6) : '0'} USDT
                         </span>
                       </td>
                       <td className="py-4 px-4">

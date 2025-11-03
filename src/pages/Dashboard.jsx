@@ -125,7 +125,7 @@ const Dashboard = () => {
         return {
           progress: Math.min(weeks * 10, 100),
           text: `${weeks} semanas activas`,
-          remaining: `${investment.amount * 0.1 * weeks} CLP ganados`
+          remaining: `${(investment.amount * 0.1 * weeks).toFixed(2)} USDT equivalentes`
         }
       case 'crypto':
         const days = investment.createdAt ? Math.floor((Date.now() - new Date(investment.createdAt).getTime()) / (24 * 60 * 60 * 1000)) : 0
@@ -234,9 +234,9 @@ const Dashboard = () => {
             </div>
             <h3 className="text-sm text-gray-400 mb-1">Balance Total</h3>
             <p className="text-3xl font-black gradient-text">
-              ${user.balance?.toLocaleString('es-CL') || '0'}
+              {(user.balance_usd || 0).toFixed(2)} USD
             </p>
-            <p className="text-xs text-gray-500 mt-1">CLP</p>
+            <p className="text-xs text-gray-500 mt-1">Equivalente a USDT</p>
           </div>
 
           {/* Active Pack */}
@@ -255,7 +255,7 @@ const Dashboard = () => {
             </p>
             {investment && (
               <p className="text-xs text-gray-500">
-                ${investment.amount?.toLocaleString('es-CL') || '0'} invertido
+                {Number(investment.amount || 0).toFixed(6)} USDT invertidos
               </p>
             )}
           </div>
@@ -270,9 +270,9 @@ const Dashboard = () => {
             </div>
             <h3 className="text-sm text-gray-400 mb-1">Total Ganado</h3>
             <p className="text-3xl font-black text-gold">
-              +${user.earnings?.toLocaleString('es-CL') || '0'}
+              +{Number(user.earnings_usd || 0).toFixed(2)} USD
             </p>
-            <p className="text-xs text-gray-500 mt-1">CLP</p>
+            <p className="text-xs text-gray-500 mt-1">Equivalente</p>
           </div>
 
           {/* Referrals */}
@@ -324,7 +324,7 @@ const Dashboard = () => {
                       <div className="flex items-center gap-4 text-sm text-gray-400">
                         <span className="flex items-center gap-1">
                           <DollarSign className="w-4 h-4" />
-                          ${investment.amount?.toLocaleString('es-CL') || '0'} CLP
+                          {Number(investment.amount || 0).toFixed(6)} USDT
                         </span>
                         <span className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
@@ -549,7 +549,8 @@ const Dashboard = () => {
                           activity.amount > 0 ? 'text-green-money' : 'text-gray-400'
                         }`}>
                           {activity.amount > 0 ? '+' : ''}
-                          ${activity.amount?.toLocaleString('es-CL') || '0'} CLP
+                          {Number(activity.amount_usdt || 0).toFixed(6)} USDT
+                          <span className="text-xs text-gray-400 ml-2">≈ {Number(activity.amount_usd || 0).toFixed(2)} USD</span>
                         </span>
                       </td>
                       <td className="py-4 px-4 text-sm text-gray-400">
