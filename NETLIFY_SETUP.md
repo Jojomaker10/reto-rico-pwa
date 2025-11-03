@@ -18,9 +18,9 @@ Todos los archivos con credenciales reales han sido limpiados y reemplazados con
 
    | Variable | Valor |
    |----------|-------|
-   | `VITE_SUPABASE_URL` | `https://sopvzvcfswxvpytsvner.supabase.co` |
-   | `VITE_SUPABASE_KEY` | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvcHZ6dmNmc3d4dnB5dHN2bmVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIwMDcyMjcsImV4cCI6MjA3NzU4MzIyN30.Gg-uJvN1vbrjq5_j2uKjx9SSMDpKSl_OKy2sCLG1-1w` |
-   | `VITE_ADMIN_EMAIL` | `alcinjonas9@gmail.com` |
+   | `VITE_SUPABASE_URL` | `https://tu-proyecto.supabase.co` (reemplaza con tu URL real) |
+   | `VITE_SUPABASE_KEY` | `tu_supabase_key_completa_aqui` (reemplaza con tu key real) |
+   | `VITE_ADMIN_EMAIL` | `tu-email-admin@ejemplo.com` (reemplaza con tu email real) |
 
 4. **Para cada variable:**
    - Click en **"Add a variable"**
