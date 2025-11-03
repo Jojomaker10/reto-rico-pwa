@@ -225,10 +225,12 @@ Usa mi código de referido: ${user?.referralCode}
               <span className="text-xs text-green-money font-medium">Ganado</span>
             </div>
             <h3 className="text-sm text-gray-400 mb-1">Total Ganado</h3>
-            <p className="text-3xl font-black gradient-text">
-              {Number(stats.totalEarned || 0).toFixed(6)} USDT
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Equivalente USD en UI</p>
+            <div>
+              <p className="text-3xl font-black gradient-text">
+                {Number(stats.totalEarned || 0).toFixed(6)} USDT
+              </p>
+              <p className="text-xs text-gray-500 mt-1">≈ {Number(stats.totalEarned || 0).toFixed(2)} USD</p>
+            </div>
           </div>
 
           <div className="card hover:scale-105 transition-transform">
@@ -239,10 +241,12 @@ Usa mi código de referido: ${user?.referralCode}
               <span className="text-xs text-gold font-medium">Pendiente</span>
             </div>
             <h3 className="text-sm text-gray-400 mb-1">Por Cobrar</h3>
-            <p className="text-3xl font-black text-gold">
-              {Number(stats.pending || 0).toFixed(6)} USDT
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Equivalente USD en UI</p>
+            <div>
+              <p className="text-3xl font-black text-gold">
+                {Number(stats.pending || 0).toFixed(6)} USDT
+              </p>
+              <p className="text-xs text-gray-500 mt-1">≈ {Number(stats.pending || 0).toFixed(2)} USD</p>
+            </div>
           </div>
         </div>
 
@@ -442,14 +446,16 @@ Usa mi código de referido: ${user?.referralCode}
                         </div>
                       </td>
                       <td className="py-4 px-4">
-                        <span className="text-sm font-medium text-white">
+                        <div className="text-sm font-medium text-white">
                           {ref.investment ? Number(ref.investment.amount || 0).toFixed(6) : '0'} USDT
-                        </span>
+                        </div>
+                        <div className="text-xs text-gray-400">≈ {ref.investment ? Number(ref.investment.amount || 0).toFixed(2) : '0.00'} USD</div>
                       </td>
                       <td className="py-4 px-4">
-                        <span className="text-sm font-bold text-green-money">
+                        <div className="text-sm font-bold text-green-money">
                           {ref.investment ? (ref.investment.amount * 0.10).toFixed(6) : '0'} USDT
-                        </span>
+                        </div>
+                        <div className="text-xs text-gray-400">≈ {ref.investment ? (ref.investment.amount * 0.10).toFixed(2) : '0.00'} USD</div>
                       </td>
                       <td className="py-4 px-4">
                         {ref.investment ? getStatusBadge(ref.investment.status) : (
