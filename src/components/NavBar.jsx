@@ -24,6 +24,9 @@ const NavBar = () => {
 
         {/* Navigation Links */}
         <div className="flex items-center gap-4">
+          <Link to="/" className="px-4 py-2 text-gray-300 hover:text-white transition-colors">
+            Home
+          </Link>
           {isAuthenticated ? (
             <>
               <Link to="/dashboard" className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white transition-colors">
