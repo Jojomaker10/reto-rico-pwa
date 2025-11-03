@@ -1,22 +1,37 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import useAuthStore from '../store/authStoreSupabase'
 
 export default function AdminDashboard() {
   const [pending, setPending] = useState([])
+  const [stats, setStats] = useState(null)
+  const { user, isAuthenticated, init } = useAuthStore()
+  const isAdmin = !!user?.id && import.meta.env.VITE_ADMIN_USER_ID ? (user.id === import.meta.env.VITE_ADMIN_USER_ID) : false
 
   const load = async () => {
-    const { data } = await axios.get('/api/withdrawals/admin/pending')
+    const { data } = await axios.get('/api/withdrawals/admin/pending', { headers: { 'x-user-id': user.id } })
     setPending(data)
+    const statsRes = await axios.get('/api/admin/stats', { headers: { 'x-user-id': user.id } })
+    setStats(statsRes.data)
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { (async () => { await init(); if (isAuthenticated && isAdmin) load() })() }, [init, isAuthenticated, isAdmin])
 
-  const approve = async (id) => { await axios.post(`/api/withdrawals/admin/${id}/approve`); load() }
-  const processSend = async (id) => { await axios.post(`/api/withdrawals/admin/${id}/process`); load() }
+  if (!isAdmin) return <div className="p-6 text-red-400">Acceso solo para administrador.</div>
+
+  const approve = async (id) => { await axios.post(`/api/withdrawals/admin/${id}/approve`, null, { headers: { 'x-user-id': user.id } }); load() }
+  const processSend = async (id) => { await axios.post(`/api/withdrawals/admin/${id}/process`, null, { headers: { 'x-user-id': user.id } }); load() }
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Admin - Retiros Pendientes</h1>
+      {stats && (
+        <div className="grid md:grid-cols-3 gap-4 mb-6">
+          <div className="card"><div className="text-sm text-gray-400">Usuarios (24h / total)</div><div className="text-2xl font-bold">{stats.users.last24h} / {stats.users.total}</div></div>
+          <div className="card"><div className="text-sm text-gray-400">Depósitos (24h / total) USDT</div><div className="text-2xl font-bold">{stats.deposits.last24h_usdt} / {stats.deposits.total_usdt}</div></div>
+          <div className="card"><div className="text-sm text-gray-400">Retiros Pendientes / Total</div><div className="text-2xl font-bold">{stats.withdrawals.pending} / {stats.withdrawals.total}</div></div>
+        </div>
+      )}
       <table className="w-full text-sm">
         <thead><tr><th>Usuario</th><th>Monto (USDT)</th><th>Dirección</th><th>Acciones</th></tr></thead>
         <tbody>
