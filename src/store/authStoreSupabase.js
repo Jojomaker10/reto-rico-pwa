@@ -10,8 +10,22 @@ const useAuthStore = create((set, get) => ({
   // Initialize auth from Supabase
   init: async () => {
     try {
+      // Check if Supabase is configured
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
+      if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
+        console.warn('Supabase no configurado. La app funcionará en modo local.')
+        set({ isLoading: false, isAuthenticated: false })
+        return
+      }
+
       // Check for existing session
-      const { data: { session } } = await supabase.auth.getSession()
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      
+      if (sessionError) {
+        console.error('Error getting session:', sessionError)
+        set({ isLoading: false, isAuthenticated: false })
+        return
+      }
       
       if (session?.user) {
         // Get user profile from database
@@ -27,12 +41,14 @@ const useAuthStore = create((set, get) => ({
             isAuthenticated: true,
             isLoading: false 
           })
+          return
         }
       }
+      
+      set({ isLoading: false, isAuthenticated: false })
     } catch (error) {
       console.error('Error initializing auth:', error)
-    } finally {
-      set({ isLoading: false })
+      set({ isLoading: false, isAuthenticated: false })
     }
   },
 

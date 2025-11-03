@@ -10,6 +10,8 @@ import Withdrawals from './pages/Withdrawals'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
+  console.log('✅ App component renderizando...')
+  
   return (
     <BrowserRouter>
       <Routes>
