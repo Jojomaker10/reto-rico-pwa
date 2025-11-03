@@ -19,12 +19,15 @@ export default function Transactions() {
       <div>
         <h2 className="text-xl font-bold mb-3">Depósitos</h2>
         <table className="w-full text-sm">
-          <thead><tr><th>Fecha</th><th>Monto (USDT)</th><th>Estado</th><th>Hash</th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Monto</th><th>Estado</th><th>Hash</th></tr></thead>
           <tbody>
             {deposits.map((x) => (
               <tr key={x.id}>
                 <td>{new Date(x.createdAt).toLocaleString()}</td>
-                <td>{x.amount_usdt}</td>
+                <td>
+                  <div className="font-semibold">{Number(x.amount_usdt).toFixed(6)} USDT</div>
+                  <div className="text-gray-400 text-xs">≈ {Number(x.amount_usd).toFixed(2)} USD</div>
+                </td>
                 <td>{x.status}</td>
                 <td><a className="text-blue-400" href={`https://tronscan.org/#/transaction/${x.tx_hash}`} target="_blank">Ver</a></td>
               </tr>
@@ -35,12 +38,15 @@ export default function Transactions() {
       <div>
         <h2 className="text-xl font-bold mb-3">Retiros</h2>
         <table className="w-full text-sm">
-          <thead><tr><th>Fecha</th><th>Monto (USDT)</th><th>Estado</th><th>Hash</th></tr></thead>
+          <thead><tr><th>Fecha</th><th>Monto</th><th>Estado</th><th>Hash</th></tr></thead>
           <tbody>
             {withdrawals.map((x) => (
               <tr key={x.id}>
                 <td>{new Date(x.createdAt).toLocaleString()}</td>
-                <td>{x.amount_usdt}</td>
+                <td>
+                  <div className="font-semibold">{Number(x.amount_usdt).toFixed(6)} USDT</div>
+                  <div className="text-gray-400 text-xs">≈ {Number(x.amount_usd).toFixed(2)} USD</div>
+                </td>
                 <td>{x.status}</td>
                 <td>{x.tx_hash ? <a className="text-blue-400" href={`https://tronscan.org/#/transaction/${x.tx_hash}`} target="_blank">Ver</a> : '-'}</td>
               </tr>
