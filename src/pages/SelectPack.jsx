@@ -76,13 +76,13 @@ const SelectPack = () => {
       })
       await secureStorage.setItem('users', updatedUsers)
 
-      // Si es Pack Inicio, acreditar 25 USD bloqueados para segundo pack
+      // Si es Pack Inicio, acreditar 10 USD bloqueados para segundo pack
       if (activePack.type === 'inicio') {
         try {
           await fetch('/api/users/credit-locked', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-user-id': user.id },
-            body: JSON.stringify({ amount_usd: 25 })
+            body: JSON.stringify({ amount_usd: 10 })
           })
         } catch (e) {
           // Silenciar error; el usuario podrá reportar depósito manualmente si fuese necesario
