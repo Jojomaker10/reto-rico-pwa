@@ -30,6 +30,12 @@ const NavBar = () => {
                 <User className="w-4 h-4" />
                 <span>{user?.name}</span>
               </Link>
+              <Link
+                to="/deposit"
+                className="px-4 py-2 bg-gradient-to-r from-green-money to-emerald-600 text-white rounded-lg hover:shadow-lg hover:shadow-green-money/50 transition-all font-medium"
+              >
+                Depositar USDT
+              </Link>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg transition-colors"

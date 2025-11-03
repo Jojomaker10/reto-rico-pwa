@@ -11,7 +11,6 @@ export default function Deposit() {
   const [error, setError] = useState('')
   const [txHash, setTxHash] = useState('')
   const [msg, setMsg] = useState('')
-  const [lastTxId, setLastTxId] = useState('')
 
   useEffect(() => {
     ;(async () => {
@@ -65,7 +64,6 @@ export default function Deposit() {
                   if (!txHash) { setError('Ingresa el hash de la transacción'); return }
                   await axios.post('/api/deposits/report', { tx_hash: txHash }, { headers: { 'x-user-id': user.id } })
                   setMsg('Depósito verificado y acreditado.')
-                  setLastTxId(txHash)
                   setTxHash('')
                 } catch (e) {
                   setError(e.response?.data?.error || 'No se pudo verificar la transacción')
@@ -74,28 +72,7 @@ export default function Deposit() {
             >
               Confirmar depósito
             </button>
-            {msg && (
-              <div className="text-emerald-400 space-y-2">
-                <p>{msg}</p>
-                {lastTxId && (
-                  <a
-                    className="underline text-emerald-300"
-                    href={`https://nile.tronscan.org/#/transaction/${lastTxId}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Ver transacción en Tronscan
-                  </a>
-                )}
-              </div>
-            )}
-            <button
-              type="button"
-              className="mt-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded text-sm"
-              onClick={() => window.location.reload()}
-            >
-              Actualizar página
-            </button>
+            {msg && <p className="text-emerald-400">{msg}</p>}
           </div>
         </div>
       )}

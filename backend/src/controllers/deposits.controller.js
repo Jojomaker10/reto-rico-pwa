@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import User from '../models/User.js'
 import Deposit from '../models/Deposit.js'
 import { generateDepositAddressForUser } from '../services/blockchain/tron.service.js'

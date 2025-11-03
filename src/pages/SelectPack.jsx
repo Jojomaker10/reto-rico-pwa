@@ -137,21 +137,13 @@ const SelectPack = () => {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => handleSelectPack('inicio', 0)}
-                className="flex-1 py-4 px-6 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all flex items-center justify-center gap-2"
-              >
-                Seleccionar Pack Inicio
-                <ArrowRight className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => navigate('/deposit')}
-                className="flex-1 py-4 px-6 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-semibold transition-colors"
-              >
-                Depositar USDT
-              </button>
-            </div>
+            <button
+              onClick={() => handleSelectPack('inicio', 0)}
+              className="w-full py-4 px-6 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all flex items-center justify-center gap-2"
+            >
+              Seleccionar Pack Inicio
+              <ArrowRight className="w-5 h-5" />
+            </button>
           </div>
 
           {/* PACK TRADING */}
@@ -202,21 +194,13 @@ const SelectPack = () => {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => handleSelectPack('trading', tradingAmount)}
-                className="flex-1 py-4 px-6 bg-gradient-to-r from-green-money to-emerald-600 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-green-money/50 transition-all flex items-center justify-center gap-2"
-              >
-                Invertir en Trading
-                <ArrowRight className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => navigate('/deposit')}
-                className="flex-1 py-4 px-6 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-semibold transition-colors"
-              >
-                Depositar USDT
-              </button>
-            </div>
+            <button
+              onClick={() => handleSelectPack('trading', tradingAmount)}
+              className="w-full py-4 px-6 bg-gradient-to-r from-green-money to-emerald-600 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-green-money/50 transition-all flex items-center justify-center gap-2"
+            >
+              Invertir en Trading
+              <ArrowRight className="w-5 h-5" />
+            </button>
           </div>
 
           {/* PACK CRYPTO */}
@@ -269,21 +253,13 @@ const SelectPack = () => {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => handleSelectPack('crypto', cryptoAmount)}
-                className="flex-1 py-4 px-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-purple-500/50 transition-all flex items-center justify-center gap-2"
-              >
-                Invertir en Crypto
-                <ArrowRight className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => navigate('/deposit')}
-                className="flex-1 py-4 px-6 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-semibold transition-colors"
-              >
-                Depositar USDT
-              </button>
-            </div>
+            <button
+              onClick={() => handleSelectPack('crypto', cryptoAmount)}
+              className="w-full py-4 px-6 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-purple-500/50 transition-all flex items-center justify-center gap-2"
+            >
+              Invertir en Crypto
+              <ArrowRight className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
