@@ -26,8 +26,11 @@ export const requestWithdrawal = async (req, res) => {
   const rate = await getUSDTtoUSD()
   const amount_usd = normalized * rate
 
-  // Validar saldo en USD equivalente
-  if (Number(user.balance_usd) < amount_usd) return res.status(400).json({ error: 'Saldo insuficiente' })
+  // Validar saldo disponible = balance_usd - locked_usd
+  const totalUsd = Number(user.balance_usd || 0)
+  const lockedUsd = Number(user.locked_usd || 0)
+  const availableUsd = totalUsd - lockedUsd
+  if (availableUsd < amount_usd) return res.status(400).json({ error: 'Saldo insuficiente (fondos bloqueados para packs)' })
 
   const wd = await Withdrawal.create({
     user_id: user.id,

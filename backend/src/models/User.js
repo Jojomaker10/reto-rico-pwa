@@ -9,6 +9,7 @@ User.init(
     email: { type: DataTypes.STRING, unique: true, allowNull: false },
     password_hash: { type: DataTypes.STRING, allowNull: false },
     balance_usd: { type: DataTypes.DECIMAL(18, 2), defaultValue: 0 },
+    locked_usd: { type: DataTypes.DECIMAL(18, 2), defaultValue: 0 },
     wallet_address_deposit: { type: DataTypes.STRING, allowNull: true },
   },
   { sequelize, modelName: 'user', timestamps: true }

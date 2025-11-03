@@ -12,7 +12,7 @@ const SelectPack = () => {
   
   const [activePack, setActivePack] = useState(null)
   const [showModal, setShowModal] = useState(false)
-  const [tradingAmount, setTradingAmount] = useState(50000)
+  const [tradingAmount, setTradingAmount] = useState(25)
   const [cryptoAmount, setCryptoAmount] = useState(100000)
 
   useEffect(() => {
@@ -75,6 +75,19 @@ const SelectPack = () => {
         return u
       })
       await secureStorage.setItem('users', updatedUsers)
+
+      // Si es Pack Inicio, acreditar 25 USD bloqueados para segundo pack
+      if (activePack.type === 'inicio') {
+        try {
+          await fetch('/api/users/credit-locked', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-user-id': user.id },
+            body: JSON.stringify({ amount_usd: 25 })
+          })
+        } catch (e) {
+          // Silenciar error; el usuario podrá reportar depósito manualmente si fuese necesario
+        }
+      }
 
       // Close modal and redirect
       setShowModal(false)
@@ -166,17 +179,17 @@ const SelectPack = () => {
               {/* Investment Amount Input */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Monto de Inversión
+                  Monto de Inversión (USDT)
                 </label>
                 <input
                   type="number"
-                  min="50000"
-                  step="10000"
+                  min="25"
+                  step="1"
                   value={tradingAmount}
-                  onChange={(e) => setTradingAmount(Math.max(50000, parseInt(e.target.value) || 50000))}
+                  onChange={(e) => setTradingAmount(Math.max(25, parseInt(e.target.value) || 25))}
                   className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:outline-none focus:border-green-money text-white text-lg font-bold"
                 />
-                <p className="text-xs text-gray-500 mt-1">Depósitos: solo USDT TRC20</p>
+                <p className="text-xs text-gray-500 mt-1">Mínimo: 25 USDT — Depósitos: solo USDT TRC20</p>
               </div>
 
               {/* Calculator */}

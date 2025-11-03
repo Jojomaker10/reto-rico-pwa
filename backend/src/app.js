@@ -5,6 +5,7 @@ import morgan from 'morgan'
 import 'dotenv/config'
 import depositsRoutes from './routes/deposits.routes.js'
 import withdrawalsRoutes from './routes/withdrawals.routes.js'
+import usersRoutes from './routes/users.routes.js'
 
 const app = express()
 app.use(cors({ origin: process.env.CLIENT_ORIGIN || '*', credentials: true }))
@@ -14,6 +15,7 @@ app.use(morgan('dev'))
 
 app.use('/api/deposits', depositsRoutes)
 app.use('/api/withdrawals', withdrawalsRoutes)
+app.use('/api/users', usersRoutes)
 
 app.get('/health', (_req, res) => res.json({ ok: true }))
 
