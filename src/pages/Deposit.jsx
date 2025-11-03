@@ -4,11 +4,19 @@ import axios from 'axios'
 import useAuthStore from '../store/authStoreSupabase'
 
 export default function Deposit() {
-  const { user, isAuthenticated } = useAuthStore()
+  const { user, isAuthenticated, init } = useAuthStore()
   const [address, setAddress] = useState('')
   const [qr, setQr] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    ;(async () => {
+      try {
+        await init()
+      } catch {}
+    })()
+  }, [init])
 
   useEffect(() => {
     ;(async () => {
@@ -28,7 +36,7 @@ export default function Deposit() {
         setLoading(false)
       }
     })()
-  }, [])
+  }, [isAuthenticated, user])
 
   return (
     <div className="p-6 max-w-xl mx-auto">
