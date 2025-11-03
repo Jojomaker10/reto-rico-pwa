@@ -6,12 +6,14 @@ export default function AdminDashboard() {
   const [pending, setPending] = useState([])
   const [stats, setStats] = useState(null)
   const { user, isAuthenticated, init } = useAuthStore()
-  const isAdmin = !!user?.id && import.meta.env.VITE_ADMIN_USER_ID ? (user.id === import.meta.env.VITE_ADMIN_USER_ID) : false
+  const isAdmin = !!user?.email && import.meta.env.VITE_ADMIN_EMAIL
+    ? (user.email?.toLowerCase() === import.meta.env.VITE_ADMIN_EMAIL?.toLowerCase())
+    : false
 
   const load = async () => {
-    const { data } = await axios.get('/api/withdrawals/admin/pending', { headers: { 'x-user-id': user.id } })
+    const { data } = await axios.get('/api/withdrawals/admin/pending', { headers: { 'x-user-email': user.email } })
     setPending(data)
-    const statsRes = await axios.get('/api/admin/stats', { headers: { 'x-user-id': user.id } })
+    const statsRes = await axios.get('/api/admin/stats', { headers: { 'x-user-email': user.email } })
     setStats(statsRes.data)
   }
 
@@ -19,8 +21,8 @@ export default function AdminDashboard() {
 
   if (!isAdmin) return <div className="p-6 text-red-400">Acceso solo para administrador.</div>
 
-  const approve = async (id) => { await axios.post(`/api/withdrawals/admin/${id}/approve`, null, { headers: { 'x-user-id': user.id } }); load() }
-  const processSend = async (id) => { await axios.post(`/api/withdrawals/admin/${id}/process`, null, { headers: { 'x-user-id': user.id } }); load() }
+  const approve = async (id) => { await axios.post(`/api/withdrawals/admin/${id}/approve`, null, { headers: { 'x-user-email': user.email } }); load() }
+  const processSend = async (id) => { await axios.post(`/api/withdrawals/admin/${id}/process`, null, { headers: { 'x-user-email': user.email } }); load() }
 
   return (
     <div className="p-6">
