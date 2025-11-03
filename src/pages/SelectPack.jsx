@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Users, TrendingUp, Bitcoin, Check, ArrowRight, Info } from 'lucide-react'
+import { Users, TrendingUp, Bitcoin, Check, ArrowRight, Info, Gift } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import useAuthStore from '../store/authStoreSupabase'
 import ConfirmInvestmentModal from '../components/ConfirmInvestmentModal'
@@ -14,12 +14,24 @@ const SelectPack = () => {
   const [showModal, setShowModal] = useState(false)
   const [tradingAmount, setTradingAmount] = useState(25)
   const [cryptoAmount, setCryptoAmount] = useState(100000)
+  const [hasCryptoCompleted, setHasCryptoCompleted] = useState(false)
 
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login')
     }
   }, [isAuthenticated, navigate])
+
+  // Verificar si el usuario completó el Pack Crypto para habilitar el Pack Misterio
+  useEffect(() => {
+    ;(async () => {
+      const investments = await secureStorage.getItem('investments') || []
+      const my = investments.filter(inv => inv.userId === user?.id)
+      // Consideramos completado si está activo o pagado
+      const completed = my.some(inv => inv.packType === 'crypto' && (inv.status === 'activo' || inv.status === 'pagado'))
+      setHasCryptoCompleted(completed)
+    })()
+  }, [user])
 
   // Calculate weekly earnings for Trading
   const calculateWeeklyEarnings = (amount) => {
@@ -286,6 +298,39 @@ const SelectPack = () => {
             </div>
           </div>
         </div>
+        </div>
+      </div>
+
+      {/* PACK MISTERIO (bloqueado hasta completar Pack Crypto) */}
+      <div className="max-w-7xl mx-auto px-4 pb-20">
+        <div className="card hover:scale-105 transition-transform duration-300">
+          <div className="text-center mb-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Gift className="w-10 h-10 text-white" />
+            </div>
+            <h2 className="text-3xl font-bold mb-2">Pack Misterio</h2>
+            <div className="text-2xl font-semibold text-yellow-400">x3 en 3 meses</div>
+            <p className="text-sm text-gray-400 mt-2">Inversión: 500 USDT</p>
+          </div>
+
+          {!hasCryptoCompleted && (
+            <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-yellow-400 text-center mb-4">
+              Bloqueado. Se activa automáticamente al completar el Pack Crypto.
+            </div>
+          )}
+
+          <button
+            disabled={!hasCryptoCompleted}
+            onClick={() => hasCryptoCompleted && handleSelectPack('misterio', 500)}
+            className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 ${
+              hasCryptoCompleted
+                ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:shadow-lg hover:shadow-yellow-500/50'
+                : 'bg-gray-800 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            {hasCryptoCompleted ? 'Invertir en Pack Misterio' : 'Bloqueado'}
+            {hasCryptoCompleted && <ArrowRight className="w-5 h-5" />}
+          </button>
         </div>
       </div>
 
