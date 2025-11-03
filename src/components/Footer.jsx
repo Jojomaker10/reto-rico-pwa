@@ -1,4 +1,4 @@
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react'
+import { Facebook, Twitter, Instagram, Linkedin, Mail } from 'lucide-react'
 
 const Footer = () => {
   return (
@@ -99,14 +99,7 @@ const Footer = () => {
                 <Mail className="w-5 h-5 text-green-money" />
                 <span>contacto@reto-rico.com</span>
               </li>
-              <li className="flex items-center gap-3 text-gray-400">
-                <Phone className="w-5 h-5 text-green-money" />
-                <span>+56 9 1234 5678</span>
-              </li>
-              <li className="flex items-start gap-3 text-gray-400">
-                <MapPin className="w-5 h-5 text-green-money flex-shrink-0" />
-                <span>Santiago, Chile</span>
-              </li>
+              {/* Teléfono y ubicación eliminados por solicitud */}
             </ul>
           </div>
         </div>
