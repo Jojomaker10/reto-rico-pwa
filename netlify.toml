@@ -9,9 +9,5 @@
 [build.environment]
   # Netlify usará estas variables desde el dashboard, no las escaneará como secretos
   SECRETS_SCAN_OMIT_KEYS = "VITE_SUPABASE_URL,VITE_SUPABASE_KEY,VITE_ADMIN_EMAIL"
-
-# Omitir el escaneo en archivos de documentación
-# (Aunque ya están en .netlifyignore, esto es una capa adicional)
-[build.environment]
+  # Omitir el escaneo en archivos de documentación
   SECRETS_SCAN_OMIT_PATHS = "*.md,NETLIFY_SETUP.md,CREAR_ENV_INSTRUCCIONES.md,CONFIGURAR_SUPABASE_AQUI.md"
-
