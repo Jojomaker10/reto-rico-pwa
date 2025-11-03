@@ -237,6 +237,14 @@ const Dashboard = () => {
               {(user.balance_usd || 0).toFixed(2)} USD
             </p>
             <p className="text-xs text-gray-500 mt-1">Equivalente a USDT</p>
+            <div className="mt-4">
+              <button
+                onClick={() => navigate('/deposit')}
+                className="w-full py-2 px-4 bg-gradient-to-r from-green-money to-emerald-600 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-green-money/40 transition-all"
+              >
+                Depositar USDT
+              </button>
+            </div>
           </div>
 
           {/* Active Pack */}
