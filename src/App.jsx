@@ -7,6 +7,10 @@ import Dashboard from './pages/Dashboard'
 import SelectPack from './pages/SelectPack'
 import Referrals from './pages/Referrals'
 import Withdrawals from './pages/Withdrawals'
+import Deposit from './pages/Deposit'
+import Withdraw from './pages/Withdraw'
+import Transactions from './pages/Transactions'
+import AdminDashboard from './pages/AdminDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -51,6 +55,10 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/deposit" element={<ProtectedRoute><Deposit /></ProtectedRoute>} />
+        <Route path="/withdraw" element={<ProtectedRoute><Withdraw /></ProtectedRoute>} />
+        <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
         {/* Redirect unknown routes */}
         <Route path="*" element={<Home />} />
       </Routes>
