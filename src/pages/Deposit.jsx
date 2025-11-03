@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import axios from 'axios'
+import useAuthStore from '../store/authStoreSupabase'
 
 export default function Deposit() {
+  const { user, isAuthenticated } = useAuthStore()
   const [address, setAddress] = useState('')
   const [qr, setQr] = useState('')
   const [loading, setLoading] = useState(false)
@@ -12,7 +14,12 @@ export default function Deposit() {
     ;(async () => {
       try {
         setLoading(true)
-        const { data } = await axios.post('/api/deposits/request', null, { headers: { 'x-user-id': 'demo-user' } })
+        if (!isAuthenticated || !user?.id) {
+          setError('Debes iniciar sesión para obtener tu dirección de depósito.')
+          setLoading(false)
+          return
+        }
+        const { data } = await axios.post('/api/deposits/request', null, { headers: { 'x-user-id': user.id } })
         setAddress(data.address)
         setQr(await QRCode.toDataURL(data.address))
       } catch (e) {
