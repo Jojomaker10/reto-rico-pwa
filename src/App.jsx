@@ -11,6 +11,7 @@ import Deposit from './pages/Deposit'
 import Withdraw from './pages/Withdraw'
 import Transactions from './pages/Transactions'
 import AdminDashboard from './pages/AdminDashboard'
+import About from './pages/About'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -59,6 +60,7 @@ function App() {
         <Route path="/withdraw" element={<ProtectedRoute><Withdraw /></ProtectedRoute>} />
         <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/about" element={<About />} />
         {/* Redirect unknown routes */}
         <Route path="*" element={<Home />} />
       </Routes>

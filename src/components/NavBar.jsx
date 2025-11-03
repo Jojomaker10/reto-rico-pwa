@@ -27,6 +27,9 @@ const NavBar = () => {
           <Link to="/" className="px-4 py-2 text-gray-300 hover:text-white transition-colors">
             Home
           </Link>
+          <Link to="/about" className="px-4 py-2 text-gray-300 hover:text-white transition-colors">
+            Quiénes Somos
+          </Link>
           {isAuthenticated ? (
             <>
               <Link to="/dashboard" className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white transition-colors">
