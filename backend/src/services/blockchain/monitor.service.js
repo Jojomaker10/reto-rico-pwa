@@ -1,6 +1,7 @@
 import Deposit from '../../models/Deposit.js'
 import User from '../../models/User.js'
 import TransactionLog from '../../models/TransactionLog.js'
+import IncomingTransfer from '../../models/IncomingTransfer.js'
 import { getUSDTtoUSD } from '../price.service.js'
 import { getUSDTTransfersToAddress } from './tron.service.js'
 
@@ -37,6 +38,22 @@ export async function scanDeposits() {
 
 export async function updateConfirmations() {
   // Integrar confirmaciones reales vía TronGrid
+}
+
+export async function scanMainAddress() {
+  const main = process.env.MAIN_DEPOSIT_ADDRESS
+  if (!main) return
+  const transfers = await getUSDTTransfersToAddress(main)
+  for (const t of transfers) {
+    const exists = await IncomingTransfer.findOne({ where: { tx_hash: t.tx_hash } })
+    if (exists) continue
+    await IncomingTransfer.create({
+      tx_hash: t.tx_hash,
+      amount_usdt: t.amount_usdt,
+      block_timestamp: t.block_timestamp,
+      processed: false,
+    })
+  }
 }
 
 
