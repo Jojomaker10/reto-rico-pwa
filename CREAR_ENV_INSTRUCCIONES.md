@@ -15,8 +15,8 @@ En la raíz del proyecto (donde está `package.json`), crea un archivo llamado `
 Abre el archivo `.env` y pega esto (las credenciales ya están en `CONFIGURAR_SUPABASE_AQUI.md`):
 
 ```env
-VITE_SUPABASE_URL=https://sopvzvcfswxvpytsvner.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvcHZ6dmNmc3d4dnB5dHN2bmVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIwMDcyMjcsImV4cCI6MjA3NzU4MzIyN30.Gg-uJvN1vbrjq5_j2uKjx9SSMDpKSl_OKy2sCLG1-1w
+VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
+VITE_SUPABASE_KEY=tu_supabase_key_aqui
 ```
 
 ### Paso 3: Reiniciar el servidor

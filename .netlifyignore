@@ -1,0 +1,11 @@
+# Archivos con credenciales que no deben procesarse en build
+CREAR_ENV_INSTRUCCIONES.md
+CONFIGURAR_SUPABASE_AQUI.md
+
+# Archivos de entorno (ya están en .gitignore, pero por seguridad)
+.env
+.env.local
+.env.production
+.env.development
+.env.*.local
+

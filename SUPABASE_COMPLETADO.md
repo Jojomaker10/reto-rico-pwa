@@ -26,8 +26,8 @@ Tu proyecto Reto-Rico PWA ahora está **conectado a Supabase** y funcionando cor
 ## 🔗 Tu Configuración
 
 ```
-Proyecto Supabase: sopvzvcfswxvpytsvner
-URL: https://sopvzvcfswxvpytsvner.supabase.co
+Proyecto Supabase: [tu-proyecto]
+URL: https://tu-proyecto.supabase.co
 Estado: Activo y funcional
 ```
 
@@ -42,7 +42,7 @@ Estado: Activo y funcional
 
 ### Paso 2: Verificar en Supabase
 
-1. Abre: https://app.supabase.com/project/sopvzvcfswxvpytsvner
+1. Abre: https://app.supabase.com/project/tu-proyecto
 2. Ve a **Authentication → Users**
 3. Debe aparecer tu usuario registrado
 

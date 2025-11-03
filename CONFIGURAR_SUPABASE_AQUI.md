@@ -13,7 +13,7 @@ Pega aquí tu Project URL de Supabase
 Ejemplo: https://abcdefghijklmnop.supabase.co
 ```
 
-**Tu URL:** https://sopvzvcfswxvpytsvner.supabase.co_____________________________________________
+**Tu URL:** https://tu-proyecto.supabase.co_____________________________________________
 
 ---
 
@@ -24,7 +24,7 @@ Pega aquí tu anon public key de Supabase
 Ejemplo: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-**Tu Key:** eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvcHZ6dmNmc3d4dnB5dHN2bmVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIwMDcyMjcsImV4cCI6MjA3NzU4MzIyN30.Gg-uJvN1vbrjq5_j2uKjx9SSMDpKSl_OKy2sCLG1-1w_____________________________________________
+**Tu Key:** eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.tu_supabase_key_completa_aqui_____________________________________________
 
 ---
 
