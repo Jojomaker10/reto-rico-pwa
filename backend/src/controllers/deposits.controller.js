@@ -5,17 +5,22 @@ import { generateDepositAddressForUser } from '../services/blockchain/tron.servi
 export const requestDepositAddress = async (req, res) => {
   const userId = req.user?.id || req.headers['x-user-id']
   if (!userId) return res.status(401).json({ error: 'No autorizado' })
+  const mainAddress = process.env.MAIN_DEPOSIT_ADDRESS
+  if (mainAddress) {
+    // Dirección única TronLink
+    return res.json({ address: mainAddress })
+  }
+
+  // Fallback: dirección única por usuario
   let user = await User.findByPk(userId)
   if (!user) {
-    // Auto-create placeholder user if not exists
     user = await User.create({
       id: userId,
       email: `${userId}@placeholder.local`,
       password_hash: 'external',
-      balance_usd: 0
+      balance_usd: 0,
     })
   }
-
   if (!user.wallet_address_deposit) {
     user.wallet_address_deposit = await generateDepositAddressForUser(userId)
     await user.save()

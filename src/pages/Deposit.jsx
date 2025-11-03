@@ -9,6 +9,8 @@ export default function Deposit() {
   const [qr, setQr] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [txHash, setTxHash] = useState('')
+  const [msg, setMsg] = useState('')
 
   useEffect(() => {
     ;(async () => {
@@ -51,6 +53,27 @@ export default function Deposit() {
             <button className="btn-primary" onClick={() => navigator.clipboard.writeText(address)}>Copiar</button>
           </div>
           <p className="text-sm text-gray-400">Envía únicamente USDT TRC20 a esta dirección.</p>
+          <div className="mt-6 space-y-3">
+            <h2 className="text-lg font-semibold">¿Ya enviaste tu depósito?</h2>
+            <input className="w-full p-3 rounded bg-gray-800" placeholder="Pega aquí el hash de la transacción (txid)" value={txHash} onChange={e=>setTxHash(e.target.value)} />
+            <button
+              className="btn-primary"
+              onClick={async () => {
+                try {
+                  setMsg(''); setError('')
+                  if (!txHash) { setError('Ingresa el hash de la transacción'); return }
+                  await axios.post('/api/deposits/report', { tx_hash: txHash }, { headers: { 'x-user-id': user.id } })
+                  setMsg('Depósito verificado y acreditado.')
+                  setTxHash('')
+                } catch (e) {
+                  setError(e.response?.data?.error || 'No se pudo verificar la transacción')
+                }
+              }}
+            >
+              Confirmar depósito
+            </button>
+            {msg && <p className="text-emerald-400">{msg}</p>}
+          </div>
         </div>
       )}
     </div>
