@@ -22,7 +22,9 @@ serve(async (req) => {
     })
 
     const url = new URL(req.url)
-    const path = url.pathname
+    // Extraer el path después de /admin/
+    const fullPath = url.pathname
+    const path = fullPath.replace(/^.*\/admin/, '') || '/'
     const userEmail = req.headers.get('x-user-email')
 
     // Verificar admin
@@ -35,7 +37,7 @@ serve(async (req) => {
     }
 
     // GET /stats - Estadísticas generales
-    if (path.includes('/stats') && req.method === 'GET') {
+    if ((path === '/stats' || path.includes('/stats')) && req.method === 'GET') {
       const now = new Date()
       const since24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
 
@@ -85,7 +87,7 @@ serve(async (req) => {
     }
 
     // GET /users - Listar usuarios
-    if (path.includes('/users') && req.method === 'GET') {
+    if ((path === '/users' || path.includes('/users')) && req.method === 'GET') {
       const search = url.searchParams.get('q') || ''
       const limit = parseInt(url.searchParams.get('limit') || '50')
       const offset = parseInt(url.searchParams.get('offset') || '0')
@@ -110,7 +112,7 @@ serve(async (req) => {
     }
 
     // GET /deposits - Listar depósitos
-    if (path.includes('/deposits') && req.method === 'GET') {
+    if ((path === '/deposits' || path.includes('/deposits')) && req.method === 'GET') {
       const status = url.searchParams.get('status') || ''
       const from = url.searchParams.get('from') || ''
       const to = url.searchParams.get('to') || ''
@@ -146,7 +148,7 @@ serve(async (req) => {
     }
 
     // GET /withdrawals - Listar retiros
-    if (path.includes('/withdrawals') && req.method === 'GET') {
+    if ((path === '/withdrawals' || path.includes('/withdrawals')) && req.method === 'GET') {
       const status = url.searchParams.get('status') || ''
       const limit = parseInt(url.searchParams.get('limit') || '50')
       const offset = parseInt(url.searchParams.get('offset') || '0')

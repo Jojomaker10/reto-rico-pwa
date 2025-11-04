@@ -39,12 +39,14 @@ serve(async (req) => {
     })
 
     const url = new URL(req.url)
-    const path = url.pathname
+    // Extraer el path después de /withdrawals/
+    const fullPath = url.pathname
+    const path = fullPath.replace(/^.*\/withdrawals/, '') || '/'
     const userId = req.headers.get('x-user-id')
     const userEmail = req.headers.get('x-user-email')
 
     // GET /history - Obtener historial de retiros
-    if (path.includes('/history') && req.method === 'GET') {
+    if ((path === '/history' || path.includes('/history')) && req.method === 'GET') {
       if (!userId) {
         return new Response(
           JSON.stringify({ error: 'No autorizado' }),
@@ -67,7 +69,7 @@ serve(async (req) => {
     }
 
     // POST /request - Solicitar retiro
-    if (path.includes('/request') && req.method === 'POST') {
+    if ((path === '/request' || path.includes('/request')) && req.method === 'POST') {
       if (!userId) {
         return new Response(
           JSON.stringify({ error: 'No autorizado' }),
@@ -156,7 +158,7 @@ serve(async (req) => {
     }
 
     // GET /admin/pending - Listar retiros pendientes (admin)
-    if (path.includes('/admin/pending') && req.method === 'GET') {
+    if ((path === '/admin/pending' || path.includes('/admin/pending')) && req.method === 'GET') {
       const adminEmail = Deno.env.get('ADMIN_EMAIL') || ''
       
       if (!userEmail || userEmail.toLowerCase() !== adminEmail.toLowerCase()) {

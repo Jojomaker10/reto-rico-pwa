@@ -132,11 +132,13 @@ serve(async (req) => {
     })
 
     const url = new URL(req.url)
-    const path = url.pathname
+    // Extraer el path después de /deposits/
+    const fullPath = url.pathname
+    const path = fullPath.replace(/^.*\/deposits/, '') || '/'
     const userId = req.headers.get('x-user-id') || url.searchParams.get('user_id')
 
     // GET /history - Obtener historial de depósitos
-    if (path.includes('/history') && req.method === 'GET') {
+    if ((path === '/history' || path.includes('/history')) && req.method === 'GET') {
       if (!userId) {
         return new Response(
           JSON.stringify({ error: 'No autorizado' }),
@@ -159,7 +161,7 @@ serve(async (req) => {
     }
 
     // POST /request - Solicitar dirección de depósito
-    if (path.includes('/request') && req.method === 'POST') {
+    if ((path === '/request' || path.includes('/request')) && req.method === 'POST') {
       if (!userId) {
         return new Response(
           JSON.stringify({ error: 'No autorizado' }),
@@ -197,7 +199,7 @@ serve(async (req) => {
     }
 
     // POST /report - Reportar transacción de depósito
-    if (path.includes('/report') && req.method === 'POST') {
+    if ((path === '/report' || path.includes('/report')) && req.method === 'POST') {
       if (!userId) {
         return new Response(
           JSON.stringify({ error: 'No autorizado' }),
