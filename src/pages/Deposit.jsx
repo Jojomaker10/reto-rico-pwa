@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
-import axios from 'axios'
+import api from '../utils/api'
 import useAuthStore from '../store/authStoreSupabase'
 
 export default function Deposit() {
@@ -29,7 +29,7 @@ export default function Deposit() {
           setLoading(false)
           return
         }
-        const { data } = await axios.post('/api/deposits/request', null, { headers: { 'x-user-id': user.id } })
+        const { data } = await api.post('/deposits/request', null, { headers: { 'x-user-id': user.id } })
         setAddress(data.address)
         setQr(await QRCode.toDataURL(data.address))
       } catch (e) {
@@ -62,7 +62,7 @@ export default function Deposit() {
                 try {
                   setMsg(''); setError('')
                   if (!txHash) { setError('Ingresa el hash de la transacción'); return }
-                  await axios.post('/api/deposits/report', { tx_hash: txHash }, { headers: { 'x-user-id': user.id } })
+                  await api.post('/deposits/report', { tx_hash: txHash }, { headers: { 'x-user-id': user.id } })
                   setMsg('Depósito verificado y acreditado.')
                   setTxHash('')
                 } catch (e) {

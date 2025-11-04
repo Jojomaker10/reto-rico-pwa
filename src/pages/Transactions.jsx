@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react'
-import axios from 'axios'
+import api from '../utils/api'
+import useAuthStore from '../store/authStoreSupabase'
 
 export default function Transactions() {
   const [deposits, setDeposits] = useState([])
   const [withdrawals, setWithdrawals] = useState([])
+  const { user } = useAuthStore()
 
   useEffect(() => {
     ;(async () => {
-      const d = await axios.get('/api/deposits/history', { headers: { 'x-user-id': 'demo-user' } })
-      const w = await axios.get('/api/withdrawals/history', { headers: { 'x-user-id': 'demo-user' } })
+      if (!user?.id) return
+      const d = await api.get('/deposits/history', { headers: { 'x-user-id': user.id } })
+      const w = await api.get('/withdrawals/history', { headers: { 'x-user-id': user.id } })
       setDeposits(d.data)
       setWithdrawals(w.data)
     })()
-  }, [])
+  }, [user])
 
   return (
     <div className="p-6 grid md:grid-cols-2 gap-6">
@@ -23,7 +26,7 @@ export default function Transactions() {
           <tbody>
             {deposits.map((x) => (
               <tr key={x.id}>
-                <td>{new Date(x.createdAt).toLocaleString()}</td>
+                <td>{new Date(x.created_at || x.createdAt).toLocaleString()}</td>
                 <td>
                   <div className="font-semibold">{Number(x.amount_usdt).toFixed(6)} USDT</div>
                   <div className="text-gray-400 text-xs">≈ {Number(x.amount_usd).toFixed(2)} USD</div>
@@ -42,7 +45,7 @@ export default function Transactions() {
           <tbody>
             {withdrawals.map((x) => (
               <tr key={x.id}>
-                <td>{new Date(x.createdAt).toLocaleString()}</td>
+                <td>{new Date(x.created_at || x.createdAt).toLocaleString()}</td>
                 <td>
                   <div className="font-semibold">{Number(x.amount_usdt).toFixed(6)} USDT</div>
                   <div className="text-gray-400 text-xs">≈ {Number(x.amount_usd).toFixed(2)} USD</div>

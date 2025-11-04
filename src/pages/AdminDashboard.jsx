@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import axios from 'axios'
+import api from '../utils/api'
 import useAuthStore from '../store/authStoreSupabase'
 
 export default function AdminDashboard() {
@@ -11,9 +11,9 @@ export default function AdminDashboard() {
     : false
 
   const load = async () => {
-    const { data } = await axios.get('/api/withdrawals/admin/pending', { headers: { 'x-user-email': user.email } })
+    const { data } = await api.get('/withdrawals/admin/pending', { headers: { 'x-user-email': user.email } })
     setPending(data)
-    const statsRes = await axios.get('/api/admin/stats', { headers: { 'x-user-email': user.email } })
+    const statsRes = await api.get('/admin/stats', { headers: { 'x-user-email': user.email } })
     setStats(statsRes.data)
   }
 
@@ -21,8 +21,8 @@ export default function AdminDashboard() {
 
   if (!isAdmin) return <div className="p-6 text-red-400">Acceso solo para administrador.</div>
 
-  const approve = async (id) => { await axios.post(`/api/withdrawals/admin/${id}/approve`, null, { headers: { 'x-user-email': user.email } }); load() }
-  const processSend = async (id) => { await axios.post(`/api/withdrawals/admin/${id}/process`, null, { headers: { 'x-user-email': user.email } }); load() }
+  const approve = async (id) => { await api.post(`/withdrawals/admin/${id}/approve`, null, { headers: { 'x-user-email': user.email } }); load() }
+  const processSend = async (id) => { await api.post(`/withdrawals/admin/${id}/process`, null, { headers: { 'x-user-email': user.email } }); load() }
 
   return (
     <div className="p-6">

@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import axios from 'axios'
+import api from '../utils/api'
+import useAuthStore from '../store/authStoreSupabase'
 
 export default function Withdraw() {
+  const { user } = useAuthStore()
   const [address, setAddress] = useState('')
   const [amountUSDT, setAmountUSDT] = useState('')
   const [code, setCode] = useState('')
@@ -15,11 +17,11 @@ export default function Withdraw() {
     setMsg('')
     setErr('')
     try {
-      await axios.post('/api/withdrawals/request', {
+      await api.post('/withdrawals/request', {
         address,
         amount_usdt: Number(amountUSDT),
         code,
-      }, { headers: { 'x-user-id': 'demo-user' } })
+      }, { headers: { 'x-user-id': user?.id } })
       setMsg('Solicitud enviada. Pendiente de aprobación.')
       setAddress(''); setAmountUSDT(''); setCode('')
     } catch (e) {
