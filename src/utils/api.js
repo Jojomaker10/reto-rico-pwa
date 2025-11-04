@@ -21,10 +21,24 @@ const api = axios.create({
   },
 })
 
-// Interceptor para agregar headers personalizados si es necesario
+// Interceptor para ajustar rutas según el entorno
 api.interceptors.request.use((config) => {
-  // En producción, las rutas ya incluyen el path completo
-  // En desarrollo, necesitamos mantener el formato /api/...
+  // En producción con Edge Functions, necesitamos incluir el nombre de la función
+  if (!isDev && config.url) {
+    // Si la URL ya incluye el nombre de la función, no hacer nada
+    if (!config.url.startsWith('/deposits') && 
+        !config.url.startsWith('/withdrawals') && 
+        !config.url.startsWith('/admin')) {
+      // Determinar qué función usar basado en la ruta
+      if (config.url.includes('/deposits')) {
+        config.url = `/deposits${config.url.replace(/^.*\/deposits/, '')}`
+      } else if (config.url.includes('/withdrawals')) {
+        config.url = `/withdrawals${config.url.replace(/^.*\/withdrawals/, '')}`
+      } else if (config.url.includes('/admin')) {
+        config.url = `/admin${config.url.replace(/^.*\/admin/, '')}`
+      }
+    }
+  }
   return config
 })
 
