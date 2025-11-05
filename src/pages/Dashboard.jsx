@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { 
   DollarSign, TrendingUp, Users, LogOut, Gift, Copy, Share2, 
   Clock, Target, Calendar, Zap, RefreshCw, Download, 
-  BarChart3, Activity, Plus
+  BarChart3, Activity, Plus, X
 } from 'lucide-react'
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import useAuthStore from '../store/authStoreSupabase'
@@ -16,6 +16,8 @@ const Dashboard = () => {
   const [activities, setActivities] = useState([])
   const [performanceData, setPerformanceData] = useState([])
   const [referralCount, setReferralCount] = useState(0)
+  const [referralsList, setReferralsList] = useState([])
+  const [showReferralsModal, setShowReferralsModal] = useState(false)
 
   useEffect(() => {
     init()
@@ -76,6 +78,7 @@ const Dashboard = () => {
       const referralCode = user?.referral_code || user?.referralCode
       const myReferrals = allUsers.filter(u => u.referredBy === referralCode)
       setReferralCount(myReferrals.length)
+      setReferralsList(myReferrals)
 
       // Load activities
       const allActivities = await secureStorage.getItem('activities') || []
@@ -396,7 +399,10 @@ const Dashboard = () => {
           </div>
 
           {/* Referrals */}
-          <div className="card hover:scale-105 transition-transform">
+          <div 
+            className="card hover:scale-105 transition-transform cursor-pointer"
+            onClick={() => setShowReferralsModal(true)}
+          >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
                 <Users className="w-6 h-6 text-white" />
@@ -405,7 +411,7 @@ const Dashboard = () => {
             </div>
             <h3 className="text-sm text-gray-400 mb-1">Referidos Totales</h3>
             <p className="text-3xl font-black text-purple-400">
-              {user.referrals || 0}
+              {referralCount || 0}
             </p>
             <p className="text-xs text-gray-500 mt-1">Personas</p>
           </div>
@@ -698,6 +704,93 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+
+      {/* Referrals Modal */}
+      {showReferralsModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gray-800 rounded-2xl border border-gray-700 max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-700">
+              <div>
+                <h2 className="text-2xl font-bold gradient-text">Mis Referidos</h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  Total: {referralCount} {referralCount === 1 ? 'referido' : 'referidos'}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowReferralsModal(false)}
+                className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                <X className="w-6 h-6 text-gray-400" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {referralsList.length > 0 ? (
+                <div className="space-y-3">
+                  {referralsList.map((referral, index) => (
+                    <div
+                      key={referral.id || index}
+                      className="p-4 bg-gray-900/50 rounded-lg border border-gray-700 hover:border-purple-500/50 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                            <Users className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-white">
+                              {referral.name || referral.email || 'Usuario sin nombre'}
+                            </p>
+                            <p className="text-sm text-gray-400">
+                              {referral.email || 'Sin email'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-gray-400">
+                            {referral.createdAt 
+                              ? new Date(referral.createdAt).toLocaleDateString('es-CL')
+                              : 'Fecha desconocida'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Users className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-xl text-gray-400 mb-2">No tienes referidos aún</p>
+                  <p className="text-sm text-gray-500">
+                    Comparte tu código de referido para comenzar a ganar
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 border-t border-gray-700 flex gap-3">
+              <button
+                onClick={() => setShowReferralsModal(false)}
+                className="flex-1 py-3 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium"
+              >
+                Cerrar
+              </button>
+              <button
+                onClick={() => {
+                  setShowReferralsModal(false)
+                  navigate('/referrals')
+                }}
+                className="flex-1 py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg transition-colors font-medium"
+              >
+                Ver Detalles
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
