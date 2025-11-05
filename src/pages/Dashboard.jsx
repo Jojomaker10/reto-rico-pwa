@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { 
   DollarSign, TrendingUp, Users, LogOut, Gift, Copy, Share2, 
   Clock, Target, Calendar, Zap, RefreshCw, Download, 
-  BarChart3, Activity, Plus, X
+  BarChart3, Activity, Plus, X, Home
 } from 'lucide-react'
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import useAuthStore from '../store/authStoreSupabase'
@@ -74,11 +74,52 @@ const Dashboard = () => {
       setInvestment(activeInvestment)
 
       // Load referrals count
+      // Cargar desde IndexedDB
       const allUsers = await secureStorage.getItem('users') || []
       const referralCode = user?.referral_code || user?.referralCode
-      const myReferrals = allUsers.filter(u => u.referredBy === referralCode)
-      setReferralCount(myReferrals.length)
-      setReferralsList(myReferrals)
+      const localReferrals = allUsers.filter(u => u.referredBy === referralCode)
+      
+      // Cargar desde Supabase también
+      let supabaseReferrals = []
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
+      if (supabaseUrl && !supabaseUrl.includes('placeholder') && user?.id && referralCode) {
+        try {
+          const { createClient } = await import('@supabase/supabase-js')
+          const supabase = createClient(
+            supabaseUrl,
+            import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+          )
+          
+          // Buscar usuarios que fueron referidos por el código del usuario actual
+          const { data: supabaseUsers, error } = await supabase
+            .from('profiles')
+            .select('id, name, email, created_at, referred_by')
+            .eq('referred_by', referralCode)
+          
+          if (!error && supabaseUsers) {
+            // Mapear formato Supabase a formato local
+            supabaseReferrals = supabaseUsers.map(u => ({
+              id: u.id,
+              name: u.name,
+              email: u.email,
+              referredBy: u.referred_by, // Mapear referred_by a referredBy
+              createdAt: u.created_at
+            }))
+          }
+        } catch (error) {
+          console.warn('Error loading referrals from Supabase:', error)
+        }
+      }
+      
+      // Combinar referidos de ambas fuentes
+      const allReferrals = [...supabaseReferrals, ...localReferrals]
+      // Eliminar duplicados por ID
+      const uniqueReferrals = allReferrals.filter((ref, index, self) => 
+        index === self.findIndex(r => r.id === ref.id)
+      )
+      
+      setReferralCount(uniqueReferrals.length)
+      setReferralsList(uniqueReferrals)
 
       // Load activities
       const allActivities = await secureStorage.getItem('activities') || []
@@ -288,6 +329,13 @@ const Dashboard = () => {
 
             {/* Navigation Menu */}
             <nav className="hidden md:flex items-center gap-2">
+              <button 
+                onClick={() => navigate('/')}
+                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-2"
+              >
+                <Home className="w-4 h-4" />
+                Home
+              </button>
               <button className="px-4 py-2 text-sm font-medium text-white bg-green-money rounded-lg">
                 Dashboard
               </button>
