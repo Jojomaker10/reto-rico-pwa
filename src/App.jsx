@@ -18,12 +18,14 @@ import Cookies from './pages/Cookies'
 import Legal from './pages/Legal'
 import Claims from './pages/Claims'
 import ProtectedRoute from './components/ProtectedRoute'
+import InstallPrompt from './components/InstallPrompt'
 
 function App() {
   console.log('✅ App component renderizando...')
   
   return (
     <BrowserRouter>
+      <InstallPrompt />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
