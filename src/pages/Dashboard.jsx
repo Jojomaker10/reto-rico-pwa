@@ -42,8 +42,8 @@ const Dashboard = () => {
       
       // Cargar inversiones de IndexedDB
       console.log('📦 Cargando inversiones...')
-      const localInvestments = await secureStorage.getItem('investments') || []
-      const localUserInvestments = localInvestments.filter(inv => inv.userId === user?.id)
+      let localInvestments = await secureStorage.getItem('investments') || []
+      let localUserInvestments = localInvestments.filter(inv => inv.userId === user?.id)
       console.log('📦 Inversiones desde IndexedDB:', localUserInvestments.length)
       
       // Intentar cargar de Supabase también
@@ -68,6 +68,29 @@ const Dashboard = () => {
           console.log('📦 Inversiones mapeadas desde Supabase:', supabaseInvestments.length)
         } catch (error) {
           console.warn('⚠️ Error loading from Supabase:', error)
+        }
+      }
+      
+      // SINCRONIZACIÓN: Eliminar de IndexedDB los packs que ya no existen en Supabase
+      if (supabaseUrl && !supabaseUrl.includes('placeholder') && supabaseInvestments.length >= 0 && user?.id) {
+        const supabaseIds = new Set(supabaseInvestments.map(inv => inv.id))
+        const investmentsToKeep = localInvestments.filter(inv => {
+          // Si el pack NO es del usuario actual, mantenerlo siempre
+          if (inv.userId !== user?.id) return true
+          // Si el pack es del usuario actual y existe en Supabase, mantenerlo
+          if (supabaseIds.has(inv.id)) return true
+          // Si es del usuario actual pero NO está en Supabase, eliminarlo
+          console.log('🗑️ Eliminando pack de IndexedDB que ya no existe en Supabase:', inv.id, inv.packType)
+          return false
+        })
+        
+        // Actualizar IndexedDB solo si hubo cambios
+        if (investmentsToKeep.length !== localInvestments.length) {
+          await secureStorage.setItem('investments', investmentsToKeep)
+          console.log('✅ IndexedDB sincronizado con Supabase. Eliminados:', localInvestments.length - investmentsToKeep.length, 'packs')
+          // Actualizar las referencias locales con los datos sincronizados
+          localInvestments = investmentsToKeep
+          localUserInvestments = investmentsToKeep.filter(inv => inv.userId === user?.id)
         }
       }
       
