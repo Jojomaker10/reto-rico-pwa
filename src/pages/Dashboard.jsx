@@ -100,12 +100,15 @@ const Dashboard = () => {
       
       // Cargar desde Supabase también (reutilizando supabaseUrl ya declarada)
       let supabaseReferrals = []
-      if (supabaseUrl && !supabaseUrl.includes('placeholder') && user?.id && referralCode) {
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_KEY || ''
+      console.log('🔑 Supabase Anon Key configurada:', !!supabaseAnonKey, supabaseAnonKey ? 'Sí' : 'No')
+      
+      if (supabaseUrl && !supabaseUrl.includes('placeholder') && supabaseAnonKey && !supabaseAnonKey.includes('placeholder') && user?.id && referralCode) {
         try {
           const { createClient } = await import('@supabase/supabase-js')
           const supabase = createClient(
             supabaseUrl,
-            import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+            supabaseAnonKey
           )
           
           // Debug: Log para verificar
@@ -183,6 +186,9 @@ const Dashboard = () => {
           }
         } catch (error) {
           console.error('❌ Error loading referrals from Supabase:', error)
+          if (error.message?.includes('supabaseKey is required') || error.message?.includes('supabaseUrl is required')) {
+            console.warn('⚠️ Variables de entorno de Supabase no configuradas en Netlify. Ve a Netlify Dashboard → Site settings → Environment variables y agrega VITE_SUPABASE_ANON_KEY')
+          }
         }
       } else {
         console.log('ℹ️ Supabase no configurado o datos faltantes:', {
