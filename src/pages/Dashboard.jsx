@@ -33,9 +33,12 @@ const Dashboard = () => {
   }, [isAuthenticated, navigate])
 
   const loadDashboardData = async () => {
+    console.log('🚀 loadDashboardData ejecutándose...')
+    console.log('🔑 User:', user?.id, user?.referral_code || user?.referralCode)
     try {
       // Obtener URL de Supabase una sola vez
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
+      console.log('🔗 Supabase URL configurada:', !!supabaseUrl, supabaseUrl ? 'Sí' : 'No')
       
       // Cargar inversiones de IndexedDB
       const localInvestments = await secureStorage.getItem('investments') || []
