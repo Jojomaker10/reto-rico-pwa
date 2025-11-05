@@ -15,11 +15,14 @@ const Dashboard = () => {
   const [investment, setInvestment] = useState(null)
   const [activities, setActivities] = useState([])
   const [performanceData, setPerformanceData] = useState([])
+  const [referralCount, setReferralCount] = useState(0)
 
   useEffect(() => {
     init()
-    loadDashboardData()
-  }, [init])
+    if (user) {
+      loadDashboardData()
+    }
+  }, [init, user])
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -34,6 +37,11 @@ const Dashboard = () => {
       const userInvestments = investments.filter(inv => inv.userId === user?.id)
       const activeInvestment = userInvestments.find(inv => inv.status === 'pendiente_verificacion' || inv.status === 'activo')
       setInvestment(activeInvestment)
+
+      // Load referrals count
+      const allUsers = await secureStorage.getItem('users') || []
+      const myReferrals = allUsers.filter(u => u.referredBy === user?.referralCode)
+      setReferralCount(myReferrals.length)
 
       // Load activities
       const allActivities = await secureStorage.getItem('activities') || []
@@ -115,10 +123,15 @@ const Dashboard = () => {
     
     switch (investment.packType) {
       case 'inicio':
+        const totalReferrals = referralCount || 0
+        const targetReferrals = 10
+        const progressPercent = Math.min((totalReferrals / targetReferrals) * 100, 100)
+        const remaining = Math.max(targetReferrals - totalReferrals, 0)
+        
         return {
-          progress: 40, // Ejemplo: 4/10 amigos
-          text: '4 de 10 amigos invitados',
-          remaining: '6 amigos restantes'
+          progress: progressPercent,
+          text: `${totalReferrals} de ${targetReferrals} amigos invitados`,
+          remaining: remaining > 0 ? `${remaining} amigos restantes` : '¡Completado!'
         }
       case 'trading':
         const weeks = investment.createdAt ? Math.floor((Date.now() - new Date(investment.createdAt).getTime()) / (7 * 24 * 60 * 60 * 1000)) : 0
