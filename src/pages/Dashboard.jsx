@@ -90,25 +90,57 @@ const Dashboard = () => {
             import.meta.env.VITE_SUPABASE_ANON_KEY || ''
           )
           
+          // Debug: Log para verificar
+          console.log('🔍 Buscando referidos con código:', referralCode)
+          
           // Buscar usuarios que fueron referidos por el código del usuario actual
           const { data: supabaseUsers, error } = await supabase
             .from('profiles')
             .select('id, name, email, created_at, referred_by')
             .eq('referred_by', referralCode)
           
-          if (!error && supabaseUsers) {
+          // Debug: Log resultados
+          console.log('📊 Resultado de Supabase:', { 
+            usuariosEncontrados: supabaseUsers?.length || 0, 
+            error: error?.message || null,
+            codigoBuscado: referralCode
+          })
+          
+          if (error) {
+            console.error('❌ Error en consulta Supabase:', error)
+            // Si hay error de permisos, mostrar mensaje útil
+            if (error.code === 'PGRST301' || error.message?.includes('policy') || error.message?.includes('RLS')) {
+              console.warn('⚠️ Error de políticas RLS. Necesitas actualizar las políticas en Supabase para permitir ver referidos.')
+              console.warn('💡 Ejecuta este SQL en Supabase:')
+              console.warn(`
+CREATE POLICY "Users can view their referrals" ON profiles
+  FOR SELECT USING (
+    referred_by IN (
+      SELECT referral_code FROM profiles WHERE id = auth.uid()
+    )
+  );
+              `)
+            }
+          } else if (supabaseUsers) {
             // Mapear formato Supabase a formato local
             supabaseReferrals = supabaseUsers.map(u => ({
               id: u.id,
-              name: u.name,
-              email: u.email,
-              referredBy: u.referred_by, // Mapear referred_by a referredBy
-              createdAt: u.created_at
+              name: u.name || u.email || 'Usuario sin nombre', // Manejar name NULL
+              email: u.email || 'Sin email',
+              referredBy: u.referred_by,
+              createdAt: u.created_at || new Date().toISOString()
             }))
+            console.log('✅ Referidos encontrados en Supabase:', supabaseReferrals.length)
           }
         } catch (error) {
-          console.warn('Error loading referrals from Supabase:', error)
+          console.error('❌ Error loading referrals from Supabase:', error)
         }
+      } else {
+        console.log('ℹ️ Supabase no configurado o datos faltantes:', {
+          hasUrl: !!supabaseUrl,
+          hasUserId: !!user?.id,
+          referralCode
+        })
       }
       
       // Combinar referidos de ambas fuentes
