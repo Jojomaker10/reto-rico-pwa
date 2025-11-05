@@ -34,13 +34,15 @@ const Dashboard = () => {
 
   const loadDashboardData = async () => {
     try {
+      // Obtener URL de Supabase una sola vez
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
+      
       // Cargar inversiones de IndexedDB
       const localInvestments = await secureStorage.getItem('investments') || []
       const localUserInvestments = localInvestments.filter(inv => inv.userId === user?.id)
       
       // Intentar cargar de Supabase también
       let supabaseInvestments = []
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
       if (supabaseUrl && !supabaseUrl.includes('placeholder') && user?.id) {
         try {
           const { getInvestments } = useAuthStore.getState()
@@ -84,9 +86,8 @@ const Dashboard = () => {
       
       console.log('📋 Referidos desde IndexedDB:', localReferrals.length)
       
-      // Cargar desde Supabase también
+      // Cargar desde Supabase también (reutilizando supabaseUrl ya declarada)
       let supabaseReferrals = []
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
       if (supabaseUrl && !supabaseUrl.includes('placeholder') && user?.id && referralCode) {
         try {
           const { createClient } = await import('@supabase/supabase-js')
