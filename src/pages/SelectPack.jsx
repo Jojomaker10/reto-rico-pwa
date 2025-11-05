@@ -75,7 +75,19 @@ const SelectPack = () => {
     return amount * 3
   }
 
-  const handleSelectPack = (packType, amount = null) => {
+  const handleSelectPack = async (packType, amount = null) => {
+    // Verificar si ya tiene un pack activo
+    const investments = await secureStorage.getItem('investments') || []
+    const userInvestments = investments.filter(inv => inv.userId === user?.id)
+    const hasActive = userInvestments.some(inv => 
+      inv.status === 'pendiente_verificacion' || inv.status === 'activo'
+    )
+
+    if (hasActive) {
+      alert('Ya tienes un pack activo. Debes completar o cancelar el pack actual antes de seleccionar uno nuevo.')
+      return
+    }
+
     setActivePack({
       type: packType,
       amount: amount
@@ -84,6 +96,19 @@ const SelectPack = () => {
   }
 
   const handleConfirmInvest = async (paymentData) => {
+    // Verificar nuevamente antes de confirmar
+    const investments = await secureStorage.getItem('investments') || []
+    const userInvestments = investments.filter(inv => inv.userId === user?.id)
+    const hasActive = userInvestments.some(inv => 
+      inv.status === 'pendiente_verificacion' || inv.status === 'activo'
+    )
+
+    if (hasActive) {
+      setShowModal(false)
+      alert('Ya tienes un pack activo. No puedes tener más de un pack activo al mismo tiempo.')
+      return
+    }
+
     // Save investment to IndexedDB
     try {
       const investment = {
@@ -99,7 +124,6 @@ const SelectPack = () => {
       }
 
       // Get existing investments
-      const investments = await secureStorage.getItem('investments') || []
       await secureStorage.setItem('investments', [...investments, investment])
 
       // Update user data

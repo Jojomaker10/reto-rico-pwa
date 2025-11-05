@@ -48,23 +48,86 @@ const Dashboard = () => {
       const userActivities = allActivities.filter(act => act.userId === user?.id)
       setActivities(userActivities.slice(0, 10).reverse())
 
-      // Generate performance data
-      generatePerformanceData()
+      // Generate performance data based on real investments and activities
+      generatePerformanceData(userInvestments, userActivities)
     } catch (error) {
       console.error('Error loading dashboard data:', error)
     }
   }
 
-  const generatePerformanceData = () => {
+  const generatePerformanceData = (userInvestments = [], activities = []) => {
+    // Generar datos de los últimos 7 días
     const data = []
+    const today = new Date()
+    
+    // Crear un mapa de ganancias por fecha desde actividades
+    const earningsByDate = {}
+    activities.forEach(act => {
+      if ((act.type === 'earning' || act.type === 'profit') && act.amount > 0) {
+        const actDate = new Date(act.createdAt || act.date)
+        const dateKey = actDate.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' })
+        earningsByDate[dateKey] = (earningsByDate[dateKey] || 0) + (act.amount || 0)
+      }
+    })
+    
     for (let i = 6; i >= 0; i--) {
-      const date = new Date()
+      const date = new Date(today)
       date.setDate(date.getDate() - i)
+      const dateStr = date.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' })
+      
+      let dailyEarnings = 0
+      
+      // Primero usar datos reales de actividades si existen
+      if (earningsByDate[dateStr]) {
+        dailyEarnings = earningsByDate[dateStr]
+      } else {
+        // Calcular ganancias proyectadas basadas en inversiones activas
+        userInvestments.forEach(inv => {
+          if (inv.status === 'activo' && inv.createdAt) {
+            const createdDate = new Date(inv.createdAt)
+            const daysSinceCreation = Math.floor((date.getTime() - createdDate.getTime()) / (24 * 60 * 60 * 1000))
+            
+            if (daysSinceCreation >= 0) {
+              switch (inv.packType) {
+                case 'trading':
+                  // 10% semanal, acumulado desde el inicio
+                  const weeksActive = Math.floor(daysSinceCreation / 7)
+                  if (weeksActive > 0) {
+                    // Proyección: ganancia total acumulada hasta este día
+                    const totalEarnings = inv.amount * 0.10 * weeksActive
+                    // Dividir entre los días para mostrar progreso diario
+                    dailyEarnings += totalEarnings / (weeksActive * 7)
+                  }
+                  break
+                case 'crypto':
+                  // x3 en 60 días, ganancia progresiva
+                  if (daysSinceCreation <= 60) {
+                    const progress = daysSinceCreation / 60
+                    const totalGain = (inv.amount * 3 - inv.amount)
+                    // Ganancia acumulada hasta este punto
+                    dailyEarnings += totalGain * progress / 60
+                  } else {
+                    // Ya completado, ganancia total
+                    dailyEarnings += (inv.amount * 3 - inv.amount) / 60
+                  }
+                  break
+                case 'inicio':
+                  // No genera ganancias diarias, solo al completar
+                  break
+                default:
+                  break
+              }
+            }
+          }
+        })
+      }
+      
       data.push({
-        date: date.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' }),
-        earnings: Math.floor(Math.random() * 50000) + 10000
+        date: dateStr,
+        earnings: Math.max(0, Math.floor(dailyEarnings))
       })
     }
+    
     setPerformanceData(data)
   }
 
