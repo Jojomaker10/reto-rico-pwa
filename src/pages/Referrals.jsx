@@ -34,7 +34,8 @@ const Referrals = () => {
       const allInvestments = await secureStorage.getItem('investments') || []
       
       // Find users referred by current user
-      const myReferrals = allUsers.filter(u => u.referredBy === user?.referralCode)
+      const referralCode = user?.referral_code || user?.referralCode
+      const myReferrals = allUsers.filter(u => u.referredBy === referralCode)
       
       // Get investment data for each referral
       const referralsWithInvestments = myReferrals.map(ref => {
@@ -109,21 +110,23 @@ const Referrals = () => {
   }
 
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(user?.referralCode)
+    const referralCode = user?.referral_code || user?.referralCode
+    navigator.clipboard.writeText(referralCode)
     alert('Código copiado al portapapeles')
   }
 
   const handleShare = (platform) => {
+    const referralCode = user?.referral_code || user?.referralCode
     const message = `¡Únete a Reto-Rico y comienza a generar ingresos! 🚀💰
 
-Usa mi código de referido: ${user?.referralCode}
+Usa mi código de referido: ${referralCode}
 
 ✅ Gana hasta 10% semanal
 ✅ Multiplica tu dinero x3
 ✅ Sistema de referidos que paga
 
 ¡No esperes más!`
-    const url = `https://reto-rico.com/?ref=${user?.referralCode}`
+    const url = `https://reto-rico.com/?ref=${referralCode}`
 
     let shareUrl = ''
     switch (platform) {
@@ -282,9 +285,9 @@ Usa mi código de referido: ${user?.referralCode}
           
           <div className="p-6 bg-gradient-to-br from-green-money/20 to-emerald-600/20 border border-green-money/30 rounded-xl mb-6">
             <div className="flex flex-col items-center gap-4">
-              <code className="text-6xl font-black tracking-wider gradient-text">
-                {user.referralCode}
-              </code>
+                  <code className="text-6xl font-black tracking-wider gradient-text">
+                    {user.referral_code || user.referralCode}
+                  </code>
               <div className="flex gap-3 w-full max-w-md">
                 <button
                   onClick={handleCopyCode}
@@ -294,7 +297,10 @@ Usa mi código de referido: ${user?.referralCode}
                   Copiar
                 </button>
                 <button
-                  onClick={() => navigator.clipboard.writeText(`https://reto-rico.com/?ref=${user.referralCode}`)}
+                  onClick={() => {
+                    const referralCode = user?.referral_code || user?.referralCode
+                    navigator.clipboard.writeText(`https://reto-rico.com/?ref=${referralCode}`)
+                  }}
                   className="flex-1 py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
                 >
                   <Share2 className="w-5 h-5" />

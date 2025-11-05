@@ -40,7 +40,8 @@ const Dashboard = () => {
 
       // Load referrals count
       const allUsers = await secureStorage.getItem('users') || []
-      const myReferrals = allUsers.filter(u => u.referredBy === user?.referralCode)
+      const referralCode = user?.referral_code || user?.referralCode
+      const myReferrals = allUsers.filter(u => u.referredBy === referralCode)
       setReferralCount(myReferrals.length)
 
       // Load activities
@@ -137,13 +138,15 @@ const Dashboard = () => {
   }
 
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(user?.referralCode)
+    const referralCode = user?.referral_code || user?.referralCode
+    navigator.clipboard.writeText(referralCode)
     alert('Código copiado al portapapeles')
   }
 
   const handleShare = (platform) => {
-    const message = `¡Únete a Reto-Rico y comienza a generar ingresos! Usa mi código: ${user?.referralCode}`
-    const url = `https://reto-rico.com/?ref=${user?.referralCode}`
+    const referralCode = user?.referral_code || user?.referralCode
+    const message = `¡Únete a Reto-Rico y comienza a generar ingresos! Usa mi código: ${referralCode}`
+    const url = `https://reto-rico.com/?ref=${referralCode}`
 
     let shareUrl = ''
     switch (platform) {
@@ -521,7 +524,7 @@ const Dashboard = () => {
                 <p className="text-sm text-gray-400 mb-4 text-center">Comparte y gana 10%</p>
                 <div className="flex flex-col items-center gap-4">
                   <code className="text-5xl font-black tracking-wider gradient-text">
-                    {user.referralCode}
+                    {user.referral_code || user.referralCode}
                   </code>
                   <button
                     onClick={handleCopyCode}
@@ -538,7 +541,7 @@ const Dashboard = () => {
                 <div className="flex items-center gap-2 text-sm text-gray-400">
                   <Share2 className="w-4 h-4" />
                   <span className="flex-1 break-all text-xs">
-                    https://reto-rico.com/?ref={user.referralCode}
+                    https://reto-rico.com/?ref={user.referral_code || user.referralCode}
                   </span>
                 </div>
               </div>
