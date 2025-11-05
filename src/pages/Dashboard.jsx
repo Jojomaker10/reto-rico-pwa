@@ -187,8 +187,17 @@ const Dashboard = () => {
         index === self.findIndex(r => r.id === ref.id)
       )
       
+      console.log('📊 RESUMEN FINAL DE REFERIDOS:')
+      console.log('  - Desde Supabase:', supabaseReferrals.length)
+      console.log('  - Desde IndexedDB:', localReferrals.length)
+      console.log('  - Total combinado:', allReferrals.length)
+      console.log('  - Después de eliminar duplicados:', uniqueReferrals.length)
+      console.log('  - Lista final:', uniqueReferrals)
+      
       setReferralCount(uniqueReferrals.length)
       setReferralsList(uniqueReferrals)
+      
+      console.log('✅ Estados actualizados - referralCount:', uniqueReferrals.length, 'referralsList:', uniqueReferrals.length)
 
       // Load activities
       const allActivities = await secureStorage.getItem('activities') || []
