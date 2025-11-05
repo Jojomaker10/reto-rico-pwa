@@ -76,8 +76,13 @@ const Dashboard = () => {
       // Load referrals count
       // Cargar desde IndexedDB
       const allUsers = await secureStorage.getItem('users') || []
-      const referralCode = user?.referral_code || user?.referralCode
-      const localReferrals = allUsers.filter(u => u.referredBy === referralCode)
+      let referralCode = (user?.referral_code || user?.referralCode || '').trim().toUpperCase()
+      const localReferrals = allUsers.filter(u => {
+        const refBy = (u.referredBy || '').trim().toUpperCase()
+        return refBy === referralCode
+      })
+      
+      console.log('📋 Referidos desde IndexedDB:', localReferrals.length)
       
       // Cargar desde Supabase también
       let supabaseReferrals = []
@@ -92,15 +97,39 @@ const Dashboard = () => {
           
           // Debug: Log para verificar
           console.log('🔍 Buscando referidos con código:', referralCode)
+          console.log('🔑 User ID:', user.id)
+          console.log('🔑 User referral_code:', user.referral_code)
+          console.log('🔑 User referralCode:', user.referralCode)
           
-          // Buscar usuarios que fueron referidos por el código del usuario actual
-          const { data: supabaseUsers, error } = await supabase
+          // Primero, intentar buscar exactamente con el código
+          let { data: supabaseUsers, error } = await supabase
             .from('profiles')
             .select('id, name, email, created_at, referred_by')
             .eq('referred_by', referralCode)
           
+          // Si no encuentra nada, intentar sin case sensitive
+          if ((!supabaseUsers || supabaseUsers.length === 0) && !error) {
+            console.log('⚠️ No se encontraron con búsqueda exacta, intentando case-insensitive...')
+            // Buscar todos los perfiles y filtrar manualmente
+            const { data: allProfiles, error: allError } = await supabase
+              .from('profiles')
+              .select('id, name, email, created_at, referred_by')
+            
+            if (!allError && allProfiles) {
+              supabaseUsers = allProfiles.filter(p => {
+                const refBy = (p.referred_by || '').trim().toUpperCase()
+                return refBy === referralCode
+              })
+              console.log('🔍 Búsqueda case-insensitive encontrada:', supabaseUsers.length)
+            }
+          }
+          
           // Debug: Log resultados
-          console.log('📊 Resultado de Supabase:', { supabaseUsers, error })
+          console.log('📊 Resultado de Supabase:', { 
+            supabaseUsers, 
+            error,
+            count: supabaseUsers?.length || 0
+          })
           
           if (error) {
             console.error('❌ Error en consulta Supabase:', error)
@@ -108,7 +137,7 @@ const Dashboard = () => {
             if (error.code === 'PGRST301' || error.message?.includes('policy') || error.message?.includes('RLS')) {
               console.warn('⚠️ Error de políticas RLS. Necesitas actualizar las políticas en Supabase para permitir ver referidos.')
             }
-          } else if (supabaseUsers) {
+          } else if (supabaseUsers && supabaseUsers.length > 0) {
             // Mapear formato Supabase a formato local
             supabaseReferrals = supabaseUsers.map(u => ({
               id: u.id,
@@ -118,6 +147,9 @@ const Dashboard = () => {
               createdAt: u.created_at || new Date().toISOString()
             }))
             console.log('✅ Referidos encontrados en Supabase:', supabaseReferrals.length)
+            console.log('📝 Detalles de referidos:', supabaseReferrals)
+          } else {
+            console.log('ℹ️ No se encontraron referidos en Supabase con código:', referralCode)
           }
         } catch (error) {
           console.error('❌ Error loading referrals from Supabase:', error)
