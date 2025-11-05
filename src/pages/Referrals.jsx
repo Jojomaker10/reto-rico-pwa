@@ -123,7 +123,7 @@ Usa mi código de referido: ${user?.referralCode}
 ✅ Sistema de referidos que paga
 
 ¡No esperes más!`
-    const url = `${window.location.origin}?ref=${user?.referralCode}`
+    const url = `https://reto-rico.com/?ref=${user?.referralCode}`
 
     let shareUrl = ''
     switch (platform) {
@@ -294,7 +294,7 @@ Usa mi código de referido: ${user?.referralCode}
                   Copiar
                 </button>
                 <button
-                  onClick={() => navigator.clipboard.writeText(`${window.location.origin}?ref=${user.referralCode}`)}
+                  onClick={() => navigator.clipboard.writeText(`https://reto-rico.com/?ref=${user.referralCode}`)}
                   className="flex-1 py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
                 >
                   <Share2 className="w-5 h-5" />

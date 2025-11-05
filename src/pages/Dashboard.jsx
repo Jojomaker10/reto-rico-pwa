@@ -143,7 +143,7 @@ const Dashboard = () => {
 
   const handleShare = (platform) => {
     const message = `¡Únete a Reto-Rico y comienza a generar ingresos! Usa mi código: ${user?.referralCode}`
-    const url = window.location.origin
+    const url = `https://reto-rico.com/?ref=${user?.referralCode}`
 
     let shareUrl = ''
     switch (platform) {
@@ -538,7 +538,7 @@ const Dashboard = () => {
                 <div className="flex items-center gap-2 text-sm text-gray-400">
                   <Share2 className="w-4 h-4" />
                   <span className="flex-1 break-all text-xs">
-                    {window.location.origin}?ref={user.referralCode}
+                    https://reto-rico.com/?ref={user.referralCode}
                   </span>
                 </div>
               </div>
