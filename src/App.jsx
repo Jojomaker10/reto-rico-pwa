@@ -12,6 +12,11 @@ import Withdraw from './pages/Withdraw'
 import Transactions from './pages/Transactions'
 import AdminDashboard from './pages/AdminDashboard'
 import About from './pages/About'
+import Terms from './pages/Terms'
+import Privacy from './pages/Privacy'
+import Cookies from './pages/Cookies'
+import Legal from './pages/Legal'
+import Claims from './pages/Claims'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -61,6 +66,11 @@ function App() {
         <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
         <Route path="/about" element={<About />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/cookies" element={<Cookies />} />
+        <Route path="/legal" element={<Legal />} />
+        <Route path="/claims" element={<Claims />} />
         {/* Redirect unknown routes */}
         <Route path="*" element={<Home />} />
       </Routes>

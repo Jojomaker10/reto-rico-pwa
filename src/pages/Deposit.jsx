@@ -33,7 +33,9 @@ export default function Deposit() {
         setAddress(data.address)
         setQr(await QRCode.toDataURL(data.address))
       } catch (e) {
-        setError('No se pudo obtener dirección de depósito')
+        const errorMessage = e.response?.data?.error || 'No se pudo obtener dirección de depósito'
+        setError(errorMessage)
+        console.error('Error obteniendo dirección de depósito:', e)
       } finally {
         setLoading(false)
       }

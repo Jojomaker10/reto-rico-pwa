@@ -1,9 +1,30 @@
 import { useState } from 'react'
 import { Check, ArrowRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import useAuthStore from '../store/authStoreSupabase'
 
 const PackCard = ({ pack, index }) => {
   const [isHovered, setIsHovered] = useState(false)
   const Icon = pack.icon
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuthStore()
+
+  const handleClick = () => {
+    if (pack?.title?.toLowerCase().includes('inicio')) {
+      if (isAuthenticated) {
+        navigate('/select-pack')
+      } else {
+        navigate('/register')
+      }
+      return
+    }
+    // Para Pack Trading y Pack Crypto
+    if (isAuthenticated) {
+      navigate('/select-pack')
+    } else {
+      navigate('/login')
+    }
+  }
 
   return (
     <div
@@ -58,6 +79,7 @@ const PackCard = ({ pack, index }) => {
                 ? 'bg-gradient-to-r from-green-money to-emerald-600 text-white hover:shadow-lg hover:shadow-green-money/50'
                 : 'bg-gradient-to-r from-gray-700 to-gray-800 text-white hover:from-gray-600 hover:to-gray-700'
             } transform ${isHovered ? 'scale-105' : ''} active:scale-95`}
+            onClick={handleClick}
           >
             {pack.cta}
             <ArrowRight className="w-5 h-5" />

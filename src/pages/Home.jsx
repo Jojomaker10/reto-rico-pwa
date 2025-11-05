@@ -96,7 +96,9 @@ const Home = () => {
       </section>
 
       {/* Benefits Section */}
-      <Benefits />
+      <div id="benefits">
+        <Benefits />
+      </div>
 
       {/* CTA Section */}
       <section className="py-20 px-4 max-w-6xl mx-auto text-center">

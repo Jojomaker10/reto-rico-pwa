@@ -169,31 +169,57 @@ serve(async (req) => {
         )
       }
 
-      const mainAddress = Deno.env.get('MAIN_DEPOSIT_ADDRESS')
+      // Dirección USDT única por defecto (fallback)
+      const defaultAddress = 'TCfSTwyseWeq3SdXMjptN2TvBHREhkJNTS'
+      const mainAddress = Deno.env.get('MAIN_DEPOSIT_ADDRESS') || defaultAddress
       
+      // Prioridad 1: Si existe MAIN_DEPOSIT_ADDRESS (o fallback), validarla y usarla
       if (mainAddress) {
-        return new Response(
-          JSON.stringify({ address: mainAddress }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+        // Limpiar espacios en blanco si los hay
+        const cleanAddress = mainAddress.trim()
+        
+        if (isValidTronAddress(cleanAddress)) {
+          return new Response(
+            JSON.stringify({ address: cleanAddress }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        } else {
+          console.error(`Dirección TRON inválida: ${cleanAddress} (longitud: ${cleanAddress.length})`)
+        }
       }
 
-      // Fallback: obtener dirección del usuario si existe
+      // Prioridad 2: Obtener dirección del usuario si existe
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('wallet_address_deposit')
         .eq('id', userId)
         .single()
 
+      // Si el perfil existe y tiene dirección, devolverla
       if (!profileError && profile?.wallet_address_deposit) {
+        const userAddress = profile.wallet_address_deposit.trim()
+        if (isValidTronAddress(userAddress)) {
+          return new Response(
+            JSON.stringify({ address: userAddress }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+      }
+
+      // Si llegamos aquí, usar la dirección por defecto (ya validada arriba)
+      if (isValidTronAddress(defaultAddress)) {
         return new Response(
-          JSON.stringify({ address: profile.wallet_address_deposit }),
+          JSON.stringify({ address: defaultAddress }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
+      // Último recurso: error
+      console.error(`No se pudo obtener dirección de depósito para userId: ${userId}`)
       return new Response(
-        JSON.stringify({ error: 'No se pudo obtener dirección de depósito' }),
+        JSON.stringify({ 
+          error: 'No se pudo obtener dirección de depósito. Por favor, contacta al soporte.' 
+        }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -216,10 +242,13 @@ serve(async (req) => {
         )
       }
 
-      const mainAddress = Deno.env.get('MAIN_DEPOSIT_ADDRESS')
-      if (!mainAddress) {
+      // Dirección USDT única por defecto (fallback)
+      const defaultAddress = 'TCfSTwyseWeq3SdXMjptN2TvBHREhkJNTS'
+      const mainAddress = Deno.env.get('MAIN_DEPOSIT_ADDRESS') || defaultAddress
+      
+      if (!mainAddress || !isValidTronAddress(mainAddress.trim())) {
         return new Response(
-          JSON.stringify({ error: 'MAIN_DEPOSIT_ADDRESS no configurada' }),
+          JSON.stringify({ error: 'MAIN_DEPOSIT_ADDRESS no configurada o inválida' }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
@@ -282,19 +311,35 @@ serve(async (req) => {
 
       if (depositError) throw depositError
 
-      // Actualizar balance del usuario
-      const { data: profile } = await supabase
+      // Actualizar balance del usuario (asegurar que el perfil existe)
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('balance_usd')
         .eq('id', userId)
         .single()
 
-      if (profile) {
+      if (profileError && profileError.code === 'PGRST116') {
+        // Perfil no existe, crear uno básico
+        const { error: createError } = await supabase
+          .from('profiles')
+          .insert({
+            id: userId,
+            balance_usd: amount_usd,
+          })
+        
+        if (createError) {
+          console.error('Error creando perfil:', createError)
+        }
+      } else if (profile) {
         const newBalance = Number(profile.balance_usd || 0) + amount_usd
-        await supabase
+        const { error: updateError } = await supabase
           .from('profiles')
           .update({ balance_usd: newBalance })
           .eq('id', userId)
+        
+        if (updateError) {
+          console.error('Error actualizando balance:', updateError)
+        }
       }
 
       return new Response(
