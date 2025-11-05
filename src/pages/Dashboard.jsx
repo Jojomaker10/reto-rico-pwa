@@ -100,26 +100,13 @@ const Dashboard = () => {
             .eq('referred_by', referralCode)
           
           // Debug: Log resultados
-          console.log('📊 Resultado de Supabase:', { 
-            usuariosEncontrados: supabaseUsers?.length || 0, 
-            error: error?.message || null,
-            codigoBuscado: referralCode
-          })
+          console.log('📊 Resultado de Supabase:', { supabaseUsers, error })
           
           if (error) {
             console.error('❌ Error en consulta Supabase:', error)
-            // Si hay error de permisos, mostrar mensaje útil
+            // Si hay error de permisos, mostrar mensaje específico
             if (error.code === 'PGRST301' || error.message?.includes('policy') || error.message?.includes('RLS')) {
               console.warn('⚠️ Error de políticas RLS. Necesitas actualizar las políticas en Supabase para permitir ver referidos.')
-              console.warn('💡 Ejecuta este SQL en Supabase:')
-              console.warn(`
-CREATE POLICY "Users can view their referrals" ON profiles
-  FOR SELECT USING (
-    referred_by IN (
-      SELECT referral_code FROM profiles WHERE id = auth.uid()
-    )
-  );
-              `)
             }
           } else if (supabaseUsers) {
             // Mapear formato Supabase a formato local
