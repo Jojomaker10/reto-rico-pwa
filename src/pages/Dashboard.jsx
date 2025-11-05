@@ -101,43 +101,60 @@ const Dashboard = () => {
           console.log('🔑 User referral_code:', user.referral_code)
           console.log('🔑 User referralCode:', user.referralCode)
           
-          // Primero, intentar buscar exactamente con el código
-          let { data: supabaseUsers, error } = await supabase
+          // Estrategia: Buscar todos los perfiles y filtrar manualmente (más confiable)
+          console.log('📥 Cargando todos los perfiles para filtrar...')
+          let supabaseUsers = []
+          const { data: allProfiles, error: allError } = await supabase
             .from('profiles')
             .select('id, name, email, created_at, referred_by')
-            .eq('referred_by', referralCode)
           
-          // Si no encuentra nada, intentar sin case sensitive
-          if ((!supabaseUsers || supabaseUsers.length === 0) && !error) {
-            console.log('⚠️ No se encontraron con búsqueda exacta, intentando case-insensitive...')
-            // Buscar todos los perfiles y filtrar manualmente
-            const { data: allProfiles, error: allError } = await supabase
+          if (allError) {
+            console.error('❌ Error cargando todos los perfiles:', allError)
+            // Intentar búsqueda específica como fallback
+            const { data: specificUsers, error: specificError } = await supabase
               .from('profiles')
               .select('id, name, email, created_at, referred_by')
+              .eq('referred_by', referralCode)
             
-            if (!allError && allProfiles) {
-              supabaseUsers = allProfiles.filter(p => {
-                const refBy = (p.referred_by || '').trim().toUpperCase()
-                return refBy === referralCode
-              })
-              console.log('🔍 Búsqueda case-insensitive encontrada:', supabaseUsers.length)
+            if (!specificError && specificUsers) {
+              supabaseUsers = specificUsers
+              console.log('✅ Búsqueda específica funcionó:', specificUsers.length)
+            } else {
+              console.error('❌ Búsqueda específica también falló:', specificError)
             }
+          } else if (allProfiles) {
+            console.log('📊 Total de perfiles cargados:', allProfiles.length)
+            // Mostrar todos los códigos referred_by para debug
+            const allRefCodes = allProfiles.map(p => p.referred_by).filter(Boolean)
+            console.log('🔍 Todos los códigos referred_by encontrados:', allRefCodes)
+            // Filtrar manualmente
+            supabaseUsers = allProfiles.filter(p => {
+              const refBy = (p.referred_by || '').trim().toUpperCase()
+              const matches = refBy === referralCode
+              if (matches) {
+                console.log('✅ Referido encontrado:', { id: p.id, name: p.name, email: p.email, referred_by: p.referred_by })
+              }
+              return matches
+            })
+            console.log('✅ Referidos encontrados después de filtrar:', supabaseUsers.length)
           }
           
           // Debug: Log resultados
           console.log('📊 Resultado de Supabase:', { 
             supabaseUsers, 
-            error,
-            count: supabaseUsers?.length || 0
+            count: supabaseUsers?.length || 0,
+            error: allError
           })
           
-          if (error) {
-            console.error('❌ Error en consulta Supabase:', error)
+          if (allError) {
+            console.error('❌ Error en consulta Supabase:', allError)
             // Si hay error de permisos, mostrar mensaje específico
-            if (error.code === 'PGRST301' || error.message?.includes('policy') || error.message?.includes('RLS')) {
+            if (allError.code === 'PGRST301' || allError.message?.includes('policy') || allError.message?.includes('RLS')) {
               console.warn('⚠️ Error de políticas RLS. Necesitas actualizar las políticas en Supabase para permitir ver referidos.')
             }
-          } else if (supabaseUsers && supabaseUsers.length > 0) {
+          }
+          
+          if (supabaseUsers && supabaseUsers.length > 0) {
             // Mapear formato Supabase a formato local
             supabaseReferrals = supabaseUsers.map(u => ({
               id: u.id,
