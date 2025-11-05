@@ -1,14 +1,55 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { DollarSign, User, LogIn } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { DollarSign, User, LogIn, Wallet } from 'lucide-react'
 import useAuthStore from '../store/authStoreSupabase'
+import secureStorage from '../utils/storage'
 
 const NavBar = () => {
   const navigate = useNavigate()
   const { isAuthenticated, user, logout } = useAuthStore()
+  const [balance, setBalance] = useState(0)
+
+  useEffect(() => {
+    const loadBalance = async () => {
+      if (isAuthenticated && user) {
+        // Si el usuario tiene balance en Supabase, usarlo
+        if (user.balance !== undefined) {
+          setBalance(Number(user.balance) || 0)
+        } else {
+          // Si no, intentar obtenerlo del storage local
+          try {
+            const users = await secureStorage.getItem('users') || []
+            const currentUser = users.find(u => u.id === user.id)
+            if (currentUser) {
+              setBalance(Number(currentUser.balance) || 0)
+            }
+          } catch (error) {
+            console.error('Error loading balance:', error)
+          }
+        }
+      }
+    }
+
+    loadBalance()
+    
+    // Actualizar balance cada 30 segundos
+    const interval = setInterval(loadBalance, 30000)
+    
+    return () => clearInterval(interval)
+  }, [isAuthenticated, user])
 
   const handleLogout = async () => {
     await logout()
     navigate('/')
+  }
+
+  const formatBalance = (amount) => {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount)
   }
 
   return (
@@ -32,6 +73,13 @@ const NavBar = () => {
           </Link>
           {isAuthenticated ? (
             <>
+              {/* Balance Display */}
+              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-money/20 to-emerald-600/20 border border-green-money/30 rounded-lg">
+                <Wallet className="w-4 h-4 text-green-money" />
+                <span className="text-green-money font-bold">
+                  {formatBalance(balance)}
+                </span>
+              </div>
               <Link to="/dashboard" className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white transition-colors">
                 <User className="w-4 h-4" />
                 <span>{user?.name}</span>

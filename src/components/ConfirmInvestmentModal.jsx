@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, Check, Upload, Users, TrendingUp, Bitcoin } from 'lucide-react'
+import { X, Check, Upload, Users, TrendingUp, Bitcoin, Gift } from 'lucide-react'
 
 const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
   const navigate = useNavigate()
@@ -36,6 +36,15 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
           description: 'Multiplica x3 en 2 meses',
           features: ['Retorno garantizado', 'Plazo fijo', 'Máxima seguridad']
         }
+      case 'misterio':
+        return {
+          name: 'Pack Misterio',
+          icon: Gift,
+          gradient: 'from-yellow-500 to-orange-500',
+          amount: pack.amount,
+          description: 'Multiplica x3 en 3 meses',
+          features: ['Retorno garantizado', 'Pack exclusivo', 'Máxima seguridad']
+        }
       default:
         return null
     }
@@ -51,7 +60,7 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
 
   const handleConfirm = () => {
     const paymentData = {
-      paymentMethod,
+      paymentMethod: pack.amount > 0 ? 'USDT' : 'gratis',
       proofUploaded: !!uploadedFile,
       fileName: uploadedFile ? fileName : null
     }
@@ -135,7 +144,6 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
             </button>
             <button
               onClick={handleConfirm}
-              disabled={pack.amount > 0 && !uploadedFile}
               className="flex-1 py-3 px-6 bg-gradient-to-r from-green-money to-emerald-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-green-money/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Confirmar Inversión

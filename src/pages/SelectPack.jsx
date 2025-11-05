@@ -24,13 +24,40 @@ const SelectPack = () => {
 
   // Verificar si el usuario completó el Pack Crypto para habilitar el Pack Misterio
   useEffect(() => {
-    ;(async () => {
+    const checkCryptoCompletion = async () => {
+      if (!user?.id) return
+      
       const investments = await secureStorage.getItem('investments') || []
-      const my = investments.filter(inv => inv.userId === user?.id)
-      // Consideramos completado si está activo o pagado
-      const completed = my.some(inv => inv.packType === 'crypto' && (inv.status === 'activo' || inv.status === 'pagado'))
+      const my = investments.filter(inv => inv.userId === user.id && inv.packType === 'crypto')
+      
+      // Consideramos completado si:
+      // 1. Tiene status 'activo' o 'pagado'
+      // 2. O si ha pasado el plazo de 2 meses desde la creación (60 días)
+      const completed = my.some(inv => {
+        if (inv.status === 'activo' || inv.status === 'pagado' || inv.status === 'completado') {
+          return true
+        }
+        
+        // Verificar si ha completado el plazo de 2 meses (60 días)
+        if (inv.createdAt) {
+          const createdDate = new Date(inv.createdAt)
+          const now = new Date()
+          const daysDiff = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24))
+          return daysDiff >= 60 // Pack Crypto tiene plazo de 2 meses
+        }
+        
+        return false
+      })
+      
       setHasCryptoCompleted(completed)
-    })()
+    }
+    
+    checkCryptoCompletion()
+    
+    // Verificar cada vez que el componente se monta o cuando cambia el usuario
+    const interval = setInterval(checkCryptoCompletion, 30000) // Verificar cada 30 segundos
+    
+    return () => clearInterval(interval)
   }, [user])
 
   // Calculate weekly earnings for Trading
