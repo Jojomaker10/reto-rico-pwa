@@ -278,11 +278,15 @@ const SelectPack = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-300">Ganancia Semanal (equiv. USD):</span>
-                    <span className="text-xl font-bold text-green-money">Estimación</span>
+                    <span className="text-xl font-bold text-green-money">
+                      ${(tradingAmount * 0.10).toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-300">Proyección Mensual (equiv. USD):</span>
-                    <span className="text-xl font-bold text-emerald-400">Estimación</span>
+                    <span className="text-xl font-bold text-emerald-400">
+                      ${(tradingAmount * 0.10 * 4).toFixed(2)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -335,12 +339,16 @@ const SelectPack = () => {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-300">Retorno Esperado (equiv. USD):</span>
-                    <span className="text-xl font-bold text-pink-400">Estimación</span>
+                    <span className="text-xl font-bold text-pink-400">
+                      ${(cryptoAmount * 3).toLocaleString()}
+                    </span>
                   </div>
                   <div className="pt-2 border-t border-purple-500/20">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-400">Ganancia neta:</span>
-                      <span className="text-lg font-bold text-white">Estimación (equiv. USD)</span>
+                      <span className="text-lg font-bold text-white">
+                        ${((cryptoAmount * 3) - cryptoAmount).toLocaleString()} USD
+                      </span>
                     </div>
                   </div>
                 </div>

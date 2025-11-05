@@ -1,6 +1,85 @@
+import { useState, useEffect } from 'react'
 import { Users, BarChart3, Shield, Zap, Target, DollarSign, TrendingUp, CheckCircle } from 'lucide-react'
+import secureStorage from '../utils/storage'
 
 const Benefits = () => {
+  const [stats, setStats] = useState({
+    activeUsers: 0,
+    totalInvested: 0,
+    satisfaction: 98,
+    support: '24/7'
+  })
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        // Cargar usuarios activos desde IndexedDB
+        const allUsers = await secureStorage.getItem('users') || []
+        const activeUsersCount = allUsers.filter(u => (Number(u.balance) || 0) > 0 || (Number(u.invested) || 0) > 0).length
+        
+        // Cargar inversiones totales desde IndexedDB
+        const allInvestments = await secureStorage.getItem('investments') || []
+        const totalInvested = allInvestments.reduce((sum, inv) => sum + (Number(inv.amount) || 0), 0)
+        
+        // Intentar cargar desde Supabase también
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
+        if (supabaseUrl && !supabaseUrl.includes('placeholder')) {
+          try {
+            const { createClient } = await import('@supabase/supabase-js')
+            const supabase = createClient(
+              supabaseUrl,
+              import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+            )
+            
+            // Obtener usuarios activos
+            const { count: usersCount } = await supabase
+              .from('profiles')
+              .select('*', { count: 'exact', head: true })
+            
+            // Obtener inversiones totales
+            const { data: investmentsData } = await supabase
+              .from('investments')
+              .select('amount')
+            
+            const supabaseInvested = investmentsData?.reduce((sum, inv) => 
+              sum + (Number(inv.amount) || 0), 0) || 0
+            
+            setStats({
+              activeUsers: usersCount || activeUsersCount,
+              totalInvested: Math.max(supabaseInvested, totalInvested),
+              satisfaction: 98,
+              support: '24/7'
+            })
+          } catch (error) {
+            console.warn('Error loading from Supabase:', error)
+            setStats({
+              activeUsers: activeUsersCount,
+              totalInvested,
+              satisfaction: 98,
+              support: '24/7'
+            })
+          }
+        } else {
+          setStats({
+            activeUsers: activeUsersCount,
+            totalInvested,
+            satisfaction: 98,
+            support: '24/7'
+          })
+        }
+      } catch (error) {
+        console.error('Error loading stats:', error)
+      }
+    }
+    
+    loadStats()
+  }, [])
+
+  const formatNumber = (num) => {
+    if (num >= 1000000) return `$${(num / 1000000).toFixed(1)}M`
+    if (num >= 1000) return `$${(num / 1000).toFixed(0)}K`
+    return num.toString()
+  }
   const benefits = [
     {
       icon: Users,
@@ -82,19 +161,23 @@ const Benefits = () => {
         {/* Stats Section */}
         <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div className="card hover:scale-105 transition-transform duration-300">
-            <div className="text-5xl font-black gradient-text mb-2">+10K</div>
+            <div className="text-5xl font-black gradient-text mb-2">
+              {stats.activeUsers > 0 ? `+${stats.activeUsers.toLocaleString()}` : '0'}
+            </div>
             <div className="text-gray-400">Usuarios Activos</div>
           </div>
           <div className="card hover:scale-105 transition-transform duration-300">
-            <div className="text-5xl font-black gradient-text mb-2">$500M</div>
+            <div className="text-5xl font-black gradient-text mb-2">
+              {formatNumber(stats.totalInvested)}
+            </div>
             <div className="text-gray-400">Invertido</div>
           </div>
           <div className="card hover:scale-105 transition-transform duration-300">
-            <div className="text-5xl font-black gradient-text mb-2">98%</div>
+            <div className="text-5xl font-black gradient-text mb-2">{stats.satisfaction}%</div>
             <div className="text-gray-400">Satisfacción</div>
           </div>
           <div className="card hover:scale-105 transition-transform duration-300">
-            <div className="text-5xl font-black gradient-text mb-2">24/7</div>
+            <div className="text-5xl font-black gradient-text mb-2">{stats.support}</div>
             <div className="text-gray-400">Soporte</div>
           </div>
         </div>
