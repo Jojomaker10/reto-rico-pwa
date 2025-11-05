@@ -1,11 +1,41 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, Check, Upload, Users, TrendingUp, Bitcoin, Gift } from 'lucide-react'
+import { X, Check, Upload, Users, TrendingUp, Bitcoin, Gift, Copy } from 'lucide-react'
+import api from '../utils/api'
+import useAuthStore from '../store/authStoreSupabase'
 
 const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
   const navigate = useNavigate()
+  const { user } = useAuthStore()
   const [uploadedFile, setUploadedFile] = useState(null)
   const [fileName, setFileName] = useState('')
+  const [txHash, setTxHash] = useState('')
+  const [depositAddress, setDepositAddress] = useState('')
+  const [loadingAddress, setLoadingAddress] = useState(false)
+  const [addressError, setAddressError] = useState('')
+
+  // Cargar dirección de depósito cuando el pack requiere pago
+  useEffect(() => {
+    const loadDepositAddress = async () => {
+      if (pack.amount > 0 && user?.id) {
+        setLoadingAddress(true)
+        setAddressError('')
+        try {
+          const { data } = await api.post('/deposits/request', null, {
+            headers: { 'x-user-id': user.id }
+          })
+          setDepositAddress(data.address)
+        } catch (error) {
+          console.error('Error loading deposit address:', error)
+          setAddressError('No se pudo cargar la dirección de depósito. Intenta más tarde.')
+        } finally {
+          setLoadingAddress(false)
+        }
+      }
+    }
+
+    loadDepositAddress()
+  }, [pack.amount, user?.id])
 
   const getPackInfo = () => {
     switch (pack.type) {
@@ -58,11 +88,25 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
     }
   }
 
+  const handleCopyAddress = () => {
+    if (depositAddress) {
+      navigator.clipboard.writeText(depositAddress)
+      alert('Dirección copiada al portapapeles')
+    }
+  }
+
   const handleConfirm = () => {
+    // Validar que el hash esté ingresado para packs con monto
+    if (pack.amount > 0 && !txHash.trim()) {
+      alert('Por favor, ingresa el hash de la transacción antes de confirmar.')
+      return
+    }
+
     const paymentData = {
       paymentMethod: pack.amount > 0 ? 'USDT' : 'gratis',
       proofUploaded: !!uploadedFile,
-      fileName: uploadedFile ? fileName : null
+      fileName: uploadedFile ? fileName : null,
+      txHash: txHash.trim() || null
     }
     onConfirm(paymentData)
   }
@@ -71,8 +115,7 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
   if (!packInfo) return null
 
   const Icon = packInfo.icon
-
-  // Depósitos únicamente en USDT (TRC20)
+  const canConfirm = pack.amount === 0 || (pack.amount > 0 && txHash.trim().length > 0)
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -123,14 +166,102 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
             </div>
           </div>
 
-          {/* Payment Method */}
-            {pack.amount > 0 && (
+          {/* Payment Section - Solo para packs con monto */}
+          {pack.amount > 0 && (
+            <div className="space-y-4">
+              {/* Instrucciones de pago */}
               <div className="p-6 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
-                <p className="font-semibold text-emerald-400 mb-2">Depósito en USDT (TRC20)</p>
-                <p className="text-sm text-gray-300 mb-4">Los depósitos se realizan exclusivamente en USDT. Genera tu dirección y escanea el QR en la sección de Depósitos.</p>
-                <button onClick={() => navigate('/deposit')} className="btn-primary">Ir a Depositar (USDT)</button>
+                <p className="font-semibold text-emerald-400 mb-2">⚠️ Instrucciones de Pago</p>
+                <ol className="text-sm text-gray-300 space-y-2 list-decimal list-inside">
+                  <li>Envía <strong>${pack.amount.toLocaleString('es-CL')} CLP</strong> en USDT (TRC20) a la dirección mostrada abajo</li>
+                  <li>Una vez completada la transacción, copia el <strong>hash (txid)</strong> de la transacción</li>
+                  <li>Pega el hash en el campo "Hash de Transacción" y confirma</li>
+                </ol>
               </div>
-            )}
+
+              {/* Dirección de depósito */}
+              <div className="p-6 bg-gray-800/50 border border-gray-700 rounded-xl">
+                <p className="font-semibold text-gray-300 mb-3">Dirección de depósito USDT (TRC20):</p>
+                {loadingAddress ? (
+                  <p className="text-gray-400">Cargando dirección...</p>
+                ) : addressError ? (
+                  <p className="text-red-400">{addressError}</p>
+                ) : depositAddress ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 p-3 bg-gray-900 rounded-lg border border-gray-700">
+                      <code className="flex-1 text-sm text-gray-300 break-all font-mono">
+                        {depositAddress}
+                      </code>
+                      <button
+                        onClick={handleCopyAddress}
+                        className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors flex-shrink-0"
+                        title="Copiar dirección"
+                      >
+                        <Copy className="w-4 h-4 text-gray-300" />
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      ⚠️ Solo envía USDT (TRC20) a esta dirección. Otras criptomonedas se perderán.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-gray-400">No se pudo cargar la dirección</p>
+                )}
+              </div>
+
+              {/* Campo para hash de transacción */}
+              <div className="p-6 bg-gray-800/50 border border-gray-700 rounded-xl">
+                <label className="block font-semibold text-gray-300 mb-3">
+                  Hash de Transacción (TxID) <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={txHash}
+                  onChange={(e) => setTxHash(e.target.value)}
+                  placeholder="Pega aquí el hash de tu transacción (ej: 0x1234...)"
+                  className="w-full p-3 bg-gray-900 border border-gray-700 rounded-lg text-gray-300 placeholder-gray-500 focus:outline-none focus:border-green-money focus:ring-2 focus:ring-green-money/20"
+                />
+                <p className="text-xs text-gray-400 mt-2">
+                  El hash se encuentra en el historial de transacciones de tu wallet después de enviar los USDT.
+                </p>
+                {txHash.trim() && (
+                  <div className="mt-3 p-2 bg-green-money/10 border border-green-money/30 rounded text-sm text-green-money">
+                    ✓ Hash ingresado correctamente
+                  </div>
+                )}
+              </div>
+
+              {/* Opción para subir comprobante (opcional) */}
+              <div className="p-6 bg-gray-800/50 border border-gray-700 rounded-xl">
+                <label className="block font-semibold text-gray-300 mb-3">
+                  Comprobante de Pago (Opcional)
+                </label>
+                <div className="flex items-center gap-4">
+                  <label className="flex-1 cursor-pointer">
+                    <input
+                      type="file"
+                      onChange={handleFileUpload}
+                      accept="image/*,.pdf"
+                      className="hidden"
+                    />
+                    <div className="p-4 border-2 border-dashed border-gray-700 rounded-lg hover:border-green-money transition-colors text-center">
+                      {uploadedFile ? (
+                        <div className="flex items-center justify-center gap-2 text-green-money">
+                          <Check className="w-5 h-5" />
+                          <span>{fileName}</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 text-gray-400">
+                          <Upload className="w-6 h-6" />
+                          <span>Haz clic para subir comprobante</span>
+                        </div>
+                      )}
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -144,9 +275,12 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
             </button>
             <button
               onClick={handleConfirm}
+              disabled={!canConfirm}
               className="flex-1 py-3 px-6 bg-gradient-to-r from-green-money to-emerald-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-green-money/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Confirmar Inversión
+              {pack.amount > 0 && !txHash.trim() 
+                ? 'Ingresa el hash primero' 
+                : 'Confirmar Inversión'}
             </button>
           </div>
         </div>

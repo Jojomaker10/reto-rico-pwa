@@ -63,7 +63,8 @@ const Dashboard = () => {
             status: inv.status,
             createdAt: inv.created_at,
             paymentMethod: inv.payment_method,
-            proofUploaded: !!inv.proof_file
+            proofUploaded: !!inv.proof_file,
+            txHash: inv.tx_hash || null
           }))
           console.log('📦 Inversiones mapeadas desde Supabase:', supabaseInvestments.length)
         } catch (error) {

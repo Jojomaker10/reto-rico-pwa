@@ -120,6 +120,7 @@ const SelectPack = () => {
         createdAt: new Date().toISOString(),
         paymentMethod: paymentData.paymentMethod,
         proofUploaded: paymentData.proofUploaded,
+        txHash: paymentData.txHash || null,
         ...paymentData
       }
 
@@ -137,6 +138,7 @@ const SelectPack = () => {
             amount: activePack.amount,
             status: 'pendiente_verificacion',
             payment_method: paymentData.paymentMethod,
+            tx_hash: paymentData.txHash || null,
             created_at: new Date().toISOString()
           })
         } catch (supabaseError) {
