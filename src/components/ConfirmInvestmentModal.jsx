@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { X, Check, Upload, Users, TrendingUp, Bitcoin, Gift, Copy } from 'lucide-react'
 import api from '../utils/api'
 import useAuthStore from '../store/authStoreSupabase'
+import useTranslation from '../hooks/useTranslation'
 
 const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
   const navigate = useNavigate()
   const { user } = useAuthStore()
+  const { t } = useTranslation()
   const [uploadedFile, setUploadedFile] = useState(null)
   const [fileName, setFileName] = useState('')
   const [txHash, setTxHash] = useState('')
@@ -41,39 +43,39 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
     switch (pack.type) {
       case 'inicio':
         return {
-          name: 'Pack Inicio',
+          name: t('packs.inicio.name'),
           icon: Users,
           gradient: 'from-blue-500 to-cyan-500',
           amount: 0,
-          description: 'Invita 10 amigos y gana 10,000 CLP',
-          features: ['Sin inversión', '100% gratuito', 'Gana al completar objetivo']
+          description: t('packs.inicio.description'),
+          features: ['Sin inversión', '100% gratuito', 'Gana al completar objetivo'] // TODO: Translate features
         }
       case 'trading':
         return {
-          name: 'Pack Trading',
+          name: t('packs.trading.name'),
           icon: TrendingUp,
           gradient: 'from-green-money to-emerald-600',
           amount: pack.amount,
-          description: '10% de retorno semanal',
-          features: ['Retornos semanales', 'Dashboard en tiempo real', 'Soporte 24/7']
+          description: t('packs.trading.description'),
+          features: ['Retornos semanales', 'Dashboard en tiempo real', 'Soporte 24/7'] // TODO: Translate features
         }
       case 'crypto':
         return {
-          name: 'Pack Crypto',
+          name: t('packs.crypto.name'),
           icon: Bitcoin,
           gradient: 'from-purple-500 to-pink-500',
           amount: pack.amount,
-          description: 'Multiplica x3 en 2 meses',
-          features: ['Retorno garantizado', 'Plazo fijo', 'Máxima seguridad']
+          description: t('packs.crypto.description'),
+          features: ['Retorno garantizado', 'Plazo fijo', 'Máxima seguridad'] // TODO: Translate features
         }
       case 'misterio':
         return {
-          name: 'Pack Misterio',
+          name: t('packs.misterio.name'),
           icon: Gift,
           gradient: 'from-yellow-500 to-orange-500',
           amount: pack.amount,
-          description: 'Multiplica x3 en 3 meses',
-          features: ['Retorno garantizado', 'Pack exclusivo', 'Máxima seguridad']
+          description: t('packs.misterio.description'),
+          features: ['Retorno garantizado', 'Pack exclusivo', 'Máxima seguridad'] // TODO: Translate features
         }
       default:
         return null
@@ -91,14 +93,14 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
   const handleCopyAddress = () => {
     if (depositAddress) {
       navigator.clipboard.writeText(depositAddress)
-      alert('Dirección copiada al portapapeles')
+      alert(t('packs.confirm.copyAddress'))
     }
   }
 
   const handleConfirm = () => {
     // Validar que el hash esté ingresado para packs con monto
     if (pack.amount > 0 && !txHash.trim()) {
-      alert('Por favor, ingresa el hash de la transacción antes de confirmar.')
+      alert(t('packs.confirm.enterHashFirst'))
       return
     }
 
@@ -122,7 +124,7 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
       <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700 shadow-2xl">
         {/* Header */}
         <div className="sticky top-0 bg-gray-900/80 backdrop-blur-lg border-b border-gray-700 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-2xl font-bold gradient-text">Confirmar Inversión</h2>
+          <h2 className="text-2xl font-bold gradient-text">{t('packs.confirm.title')}</h2>
           <button
             onClick={onClose}
             className="w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
@@ -148,7 +150,7 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
             {pack.amount > 0 && (
               <div className="pt-4 border-t border-gray-700">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-400">Monto a depositar:</span>
+                  <span className="text-gray-400">{t('packs.confirm.amount')}:</span>
                   <span className="text-3xl font-black gradient-text">
                     ${pack.amount.toLocaleString('es-CL')} CLP
                   </span>
@@ -171,21 +173,21 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
             <div className="space-y-4">
               {/* Instrucciones de pago */}
               <div className="p-6 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
-                <p className="font-semibold text-emerald-400 mb-2">⚠️ Instrucciones de Pago</p>
+                <p className="font-semibold text-emerald-400 mb-2">⚠️ {t('packs.confirm.instructions')}</p>
                 <ol className="text-sm text-gray-300 space-y-2 list-decimal list-inside">
-                  <li>Envía <strong>${pack.amount.toLocaleString('es-CL')} CLP</strong> en USDT (TRC20) a la dirección mostrada abajo</li>
-                  <li>Una vez completada la transacción, copia el <strong>hash (txid)</strong> de la transacción</li>
-                  <li>Pega el hash en el campo "Hash de Transacción" y confirma</li>
+                  <li>{t('packs.confirm.step1', { amount: pack.amount.toLocaleString('es-CL') })}</li>
+                  <li>{t('packs.confirm.step2')}</li>
+                  <li>{t('packs.confirm.step3')}</li>
                 </ol>
               </div>
 
               {/* Dirección de depósito */}
               <div className="p-6 bg-gray-800/50 border border-gray-700 rounded-xl">
-                <p className="font-semibold text-gray-300 mb-3">Dirección de depósito USDT (TRC20):</p>
+                <p className="font-semibold text-gray-300 mb-3">{t('packs.confirm.depositAddress')}:</p>
                 {loadingAddress ? (
-                  <p className="text-gray-400">Cargando dirección...</p>
+                  <p className="text-gray-400">{t('packs.confirm.loadingAddress')}</p>
                 ) : addressError ? (
-                  <p className="text-red-400">{addressError}</p>
+                  <p className="text-red-400">{t('packs.confirm.addressError')}</p>
                 ) : depositAddress ? (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 p-3 bg-gray-900 rounded-lg border border-gray-700">
@@ -195,7 +197,7 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
                       <button
                         onClick={handleCopyAddress}
                         className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors flex-shrink-0"
-                        title="Copiar dirección"
+                        title={t('packs.confirm.copyAddress')}
                       >
                         <Copy className="w-4 h-4 text-gray-300" />
                       </button>
@@ -212,17 +214,17 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
               {/* Campo para hash de transacción */}
               <div className="p-6 bg-gray-800/50 border border-gray-700 rounded-xl">
                 <label className="block font-semibold text-gray-300 mb-3">
-                  Hash de Transacción (TxID) <span className="text-red-400">*</span>
+                  {t('packs.confirm.txHash')} <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={txHash}
                   onChange={(e) => setTxHash(e.target.value)}
-                  placeholder="Pega aquí el hash de tu transacción (ej: 0x1234...)"
+                  placeholder={t('packs.confirm.txHashPlaceholder')}
                   className="w-full p-3 bg-gray-900 border border-gray-700 rounded-lg text-gray-300 placeholder-gray-500 focus:outline-none focus:border-green-money focus:ring-2 focus:ring-green-money/20"
                 />
                 <p className="text-xs text-gray-400 mt-2">
-                  El hash se encuentra en el historial de transacciones de tu wallet después de enviar los USDT.
+                  {t('packs.confirm.txHashHint')}
                 </p>
                 {txHash.trim() && (
                   <div className="mt-3 p-2 bg-green-money/10 border border-green-money/30 rounded text-sm text-green-money">
@@ -234,7 +236,7 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
               {/* Opción para subir comprobante (opcional) */}
               <div className="p-6 bg-gray-800/50 border border-gray-700 rounded-xl">
                 <label className="block font-semibold text-gray-300 mb-3">
-                  Comprobante de Pago (Opcional)
+                  {t('packs.confirm.proof')}
                 </label>
                 <div className="flex items-center gap-4">
                   <label className="flex-1 cursor-pointer">
@@ -253,7 +255,7 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
                       ) : (
                         <div className="flex flex-col items-center gap-2 text-gray-400">
                           <Upload className="w-6 h-6" />
-                          <span>Haz clic para subir comprobante</span>
+                          <span>{t('packs.confirm.uploadProof')}</span>
                         </div>
                       )}
                     </div>
@@ -271,7 +273,7 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
               onClick={onClose}
               className="flex-1 py-3 px-6 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl font-semibold transition-colors"
             >
-              Cancelar
+              {t('common.cancel')}
             </button>
             <button
               onClick={handleConfirm}
@@ -279,8 +281,8 @@ const ConfirmInvestmentModal = ({ pack, onConfirm, onClose }) => {
               className="flex-1 py-3 px-6 bg-gradient-to-r from-green-money to-emerald-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-green-money/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {pack.amount > 0 && !txHash.trim() 
-                ? 'Ingresa el hash primero' 
-                : 'Confirmar Inversión'}
+                ? t('packs.confirm.enterHashFirst') 
+                : t('packs.confirm.confirmButton')}
             </button>
           </div>
         </div>

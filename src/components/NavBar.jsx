@@ -1,13 +1,18 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { DollarSign, User, LogIn, Wallet } from 'lucide-react'
+import { DollarSign, User, LogIn, Wallet, Globe } from 'lucide-react'
 import useAuthStore from '../store/authStoreSupabase'
+import useLanguageStore from '../store/languageStore'
+import useTranslation from '../hooks/useTranslation'
 import secureStorage from '../utils/storage'
 
 const NavBar = () => {
   const navigate = useNavigate()
   const { isAuthenticated, user, logout } = useAuthStore()
+  const { language, setLanguage } = useLanguageStore()
+  const { t } = useTranslation()
   const [balance, setBalance] = useState(0)
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false)
 
   useEffect(() => {
     const loadBalance = async () => {
@@ -38,6 +43,20 @@ const NavBar = () => {
     return () => clearInterval(interval)
   }, [isAuthenticated, user])
 
+  // Cerrar menú de idioma al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const selector = document.getElementById('language-selector')
+      if (showLanguageMenu && selector && !selector.contains(event.target)) {
+        setShowLanguageMenu(false)
+      }
+    }
+    if (showLanguageMenu) {
+      document.addEventListener('click', handleClickOutside)
+    }
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [showLanguageMenu])
+
   const handleLogout = async () => {
     await logout()
     navigate('/')
@@ -66,11 +85,59 @@ const NavBar = () => {
         {/* Navigation Links */}
         <div className="flex items-center gap-4">
           <Link to="/" className="px-4 py-2 text-gray-300 hover:text-white transition-colors">
-            Home
+            {t('nav.home')}
           </Link>
           <Link to="/about" className="px-4 py-2 text-gray-300 hover:text-white transition-colors">
-            Quiénes Somos
+            {t('nav.about')}
           </Link>
+          
+          {/* Language Selector */}
+          <div className="relative" id="language-selector">
+            <button
+              onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+              className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white transition-colors rounded-lg hover:bg-gray-800"
+            >
+              <Globe className="w-4 h-4" />
+              <span className="uppercase text-sm font-medium">{language}</span>
+            </button>
+            {showLanguageMenu && (
+              <div className="absolute right-0 mt-2 w-40 bg-gray-800 rounded-lg shadow-xl border border-gray-700 overflow-hidden z-50">
+                <button
+                  onClick={() => {
+                    setLanguage('es')
+                    setShowLanguageMenu(false)
+                  }}
+                  className={`w-full px-4 py-2 text-left hover:bg-gray-700 transition-colors ${
+                    language === 'es' ? 'bg-green-money/20 text-green-money' : 'text-gray-300'
+                  }`}
+                >
+                  🇪🇸 Español
+                </button>
+                <button
+                  onClick={() => {
+                    setLanguage('en')
+                    setShowLanguageMenu(false)
+                  }}
+                  className={`w-full px-4 py-2 text-left hover:bg-gray-700 transition-colors ${
+                    language === 'en' ? 'bg-green-money/20 text-green-money' : 'text-gray-300'
+                  }`}
+                >
+                  🇬🇧 English
+                </button>
+                <button
+                  onClick={() => {
+                    setLanguage('fr')
+                    setShowLanguageMenu(false)
+                  }}
+                  className={`w-full px-4 py-2 text-left hover:bg-gray-700 transition-colors ${
+                    language === 'fr' ? 'bg-green-money/20 text-green-money' : 'text-gray-300'
+                  }`}
+                >
+                  🇫🇷 Français
+                </button>
+              </div>
+            )}
+          </div>
           {isAuthenticated ? (
             <>
               {/* Balance Display */}
@@ -88,26 +155,26 @@ const NavBar = () => {
                 to="/deposit"
                 className="px-4 py-2 bg-gradient-to-r from-green-money to-emerald-600 text-white rounded-lg hover:shadow-lg hover:shadow-green-money/50 transition-all font-medium"
               >
-                Depositar USDT
+                {t('nav.deposit')}
               </Link>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg transition-colors"
               >
-                Salir
+                {t('nav.logout')}
               </button>
             </>
           ) : (
             <>
               <Link to="/login" className="flex items-center gap-2 px-4 py-2 text-gray-300 hover:text-white transition-colors">
                 <LogIn className="w-4 h-4" />
-                Iniciar Sesión
+                {t('nav.login')}
               </Link>
               <Link
                 to="/register"
                 className="px-6 py-2 bg-gradient-to-r from-green-money to-emerald-600 text-white rounded-lg hover:shadow-lg hover:shadow-green-money/50 transition-all font-medium"
               >
-                Registrarse
+                {t('nav.register')}
               </Link>
             </>
           )}
