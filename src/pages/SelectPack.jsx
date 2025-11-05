@@ -126,7 +126,25 @@ const SelectPack = () => {
       // Get existing investments
       await secureStorage.setItem('investments', [...investments, investment])
 
-      // Update user data
+      // También guardar en Supabase si está configurado
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
+      if (supabaseUrl && !supabaseUrl.includes('placeholder') && user?.id) {
+        try {
+          const { saveInvestment } = useAuthStore.getState()
+          await saveInvestment({
+            user_id: user.id,
+            pack_type: activePack.type,
+            amount: activePack.amount,
+            status: 'pendiente_verificacion',
+            payment_method: paymentData.paymentMethod,
+            created_at: new Date().toISOString()
+          })
+        } catch (supabaseError) {
+          console.warn('Error saving to Supabase, using local storage only:', supabaseError)
+        }
+      }
+
+      // Update user data local
       const users = await secureStorage.getItem('users') || []
       const updatedUsers = users.map(u => {
         if (u.id === user.id) {

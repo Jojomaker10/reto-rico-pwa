@@ -32,10 +32,43 @@ const Dashboard = () => {
 
   const loadDashboardData = async () => {
     try {
-      // Load investments
-      const investments = await secureStorage.getItem('investments') || []
-      const userInvestments = investments.filter(inv => inv.userId === user?.id)
-      const activeInvestment = userInvestments.find(inv => inv.status === 'pendiente_verificacion' || inv.status === 'activo')
+      // Cargar inversiones de IndexedDB
+      const localInvestments = await secureStorage.getItem('investments') || []
+      const localUserInvestments = localInvestments.filter(inv => inv.userId === user?.id)
+      
+      // Intentar cargar de Supabase también
+      let supabaseInvestments = []
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
+      if (supabaseUrl && !supabaseUrl.includes('placeholder') && user?.id) {
+        try {
+          const { getInvestments } = useAuthStore.getState()
+          const supabaseData = await getInvestments()
+          // Mapear formato Supabase a formato local
+          supabaseInvestments = supabaseData.map(inv => ({
+            id: inv.id,
+            userId: inv.user_id,
+            packType: inv.pack_type,
+            amount: inv.amount,
+            status: inv.status,
+            createdAt: inv.created_at,
+            paymentMethod: inv.payment_method,
+            proofUploaded: !!inv.proof_file
+          }))
+        } catch (error) {
+          console.warn('Error loading from Supabase:', error)
+        }
+      }
+      
+      // Combinar inversiones (priorizar Supabase si existe)
+      const allInvestments = [...supabaseInvestments, ...localUserInvestments]
+      // Eliminar duplicados por ID
+      const uniqueInvestments = allInvestments.filter((inv, index, self) => 
+        index === self.findIndex(i => i.id === inv.id)
+      )
+      
+      const activeInvestment = uniqueInvestments.find(inv => 
+        inv.status === 'pendiente_verificacion' || inv.status === 'activo'
+      )
       setInvestment(activeInvestment)
 
       // Load referrals count
@@ -50,7 +83,7 @@ const Dashboard = () => {
       setActivities(userActivities.slice(0, 10).reverse())
 
       // Generate performance data based on real investments and activities
-      generatePerformanceData(userInvestments, userActivities)
+      generatePerformanceData(uniqueInvestments, userActivities)
     } catch (error) {
       console.error('Error loading dashboard data:', error)
     }
