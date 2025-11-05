@@ -15,7 +15,7 @@ const Benefits = () => {
       try {
         // Cargar usuarios activos desde IndexedDB
         const allUsers = await secureStorage.getItem('users') || []
-        const activeUsersCount = allUsers.filter(u => (Number(u.balance) || 0) > 0 || (Number(u.invested) || 0) > 0).length
+        const activeUsers = allUsers.filter(u => (u.balance > 0 || u.invested > 0)).length
         
         // Cargar inversiones totales desde IndexedDB
         const allInvestments = await secureStorage.getItem('investments') || []
@@ -45,7 +45,7 @@ const Benefits = () => {
               sum + (Number(inv.amount) || 0), 0) || 0
             
             setStats({
-              activeUsers: usersCount || activeUsersCount,
+              activeUsers: usersCount || activeUsers,
               totalInvested: Math.max(supabaseInvested, totalInvested),
               satisfaction: 98,
               support: '24/7'
@@ -53,7 +53,7 @@ const Benefits = () => {
           } catch (error) {
             console.warn('Error loading from Supabase:', error)
             setStats({
-              activeUsers: activeUsersCount,
+              activeUsers,
               totalInvested,
               satisfaction: 98,
               support: '24/7'
@@ -61,7 +61,7 @@ const Benefits = () => {
           }
         } else {
           setStats({
-            activeUsers: activeUsersCount,
+            activeUsers,
             totalInvested,
             satisfaction: 98,
             support: '24/7'

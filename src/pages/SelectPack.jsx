@@ -347,7 +347,7 @@ const SelectPack = () => {
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-400">Ganancia neta:</span>
                       <span className="text-lg font-bold text-white">
-                        ${((cryptoAmount * 3) - cryptoAmount).toLocaleString()} USD
+                        ${((cryptoAmount * 3) - cryptoAmount).toLocaleString()} (equiv. USD)
                       </span>
                     </div>
                   </div>
