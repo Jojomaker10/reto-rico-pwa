@@ -1,0 +1,43 @@
+[1mdiff --git a/src/components/PackCard.jsx b/src/components/PackCard.jsx[m
+[1mindex 06b1435..5fd4bad 100644[m
+[1m--- a/src/components/PackCard.jsx[m
+[1m+++ b/src/components/PackCard.jsx[m
+[36m@@ -1,30 +1,9 @@[m
+ import { useState } from 'react'[m
+ import { Check, ArrowRight } from 'lucide-react'[m
+[31m-import { useNavigate } from 'react-router-dom'[m
+[31m-import useAuthStore from '../store/authStoreSupabase'[m
+ [m
+ const PackCard = ({ pack, index }) => {[m
+   const [isHovered, setIsHovered] = useState(false)[m
+   const Icon = pack.icon[m
+[31m-  const navigate = useNavigate()[m
+[31m-  const { isAuthenticated } = useAuthStore()[m
+[31m-[m
+[31m-  const handleClick = () => {[m
+[31m-    if (pack?.title?.toLowerCase().includes('inicio')) {[m
+[31m-      if (isAuthenticated) {[m
+[31m-        navigate('/select-pack')[m
+[31m-      } else {[m
+[31m-        navigate('/register')[m
+[31m-      }[m
+[31m-      return[m
+[31m-    }[m
+[31m-    // Para Pack Trading y Pack Crypto[m
+[31m-    if (isAuthenticated) {[m
+[31m-      navigate('/select-pack')[m
+[31m-    } else {[m
+[31m-      navigate('/login')[m
+[31m-    }[m
+[31m-  }[m
+ [m
+   return ([m
+     <div[m
+[36m@@ -79,7 +58,6 @@[m [mconst PackCard = ({ pack, index }) => {[m
+                 ? 'bg-gradient-to-r from-green-money to-emerald-600 text-white hover:shadow-lg hover:shadow-green-money/50'[m
+                 : 'bg-gradient-to-r from-gray-700 to-gray-800 text-white hover:from-gray-600 hover:to-gray-700'[m
+             } transform ${isHovered ? 'scale-105' : ''} active:scale-95`}[m
+[31m-            onClick={handleClick}[m
+           >[m
+             {pack.cta}[m
+             <ArrowRight className="w-5 h-5" />[m
