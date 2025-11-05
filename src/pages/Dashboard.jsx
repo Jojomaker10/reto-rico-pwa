@@ -41,17 +41,21 @@ const Dashboard = () => {
       console.log('🔗 Supabase URL configurada:', !!supabaseUrl, supabaseUrl ? 'Sí' : 'No')
       
       // Cargar inversiones de IndexedDB
+      console.log('📦 Cargando inversiones...')
       const localInvestments = await secureStorage.getItem('investments') || []
       const localUserInvestments = localInvestments.filter(inv => inv.userId === user?.id)
+      console.log('📦 Inversiones desde IndexedDB:', localUserInvestments.length)
       
       // Intentar cargar de Supabase también
       let supabaseInvestments = []
       if (supabaseUrl && !supabaseUrl.includes('placeholder') && user?.id) {
         try {
+          console.log('📦 Intentando cargar inversiones desde Supabase...')
           const { getInvestments } = useAuthStore.getState()
           const supabaseData = await getInvestments()
+          console.log('📦 Datos desde Supabase:', supabaseData?.length || 0)
           // Mapear formato Supabase a formato local
-          supabaseInvestments = supabaseData.map(inv => ({
+          supabaseInvestments = (supabaseData || []).map(inv => ({
             id: inv.id,
             userId: inv.user_id,
             packType: inv.pack_type,
@@ -61,21 +65,26 @@ const Dashboard = () => {
             paymentMethod: inv.payment_method,
             proofUploaded: !!inv.proof_file
           }))
+          console.log('📦 Inversiones mapeadas desde Supabase:', supabaseInvestments.length)
         } catch (error) {
-          console.warn('Error loading from Supabase:', error)
+          console.warn('⚠️ Error loading from Supabase:', error)
         }
       }
       
       // Combinar inversiones (priorizar Supabase si existe)
       const allInvestments = [...supabaseInvestments, ...localUserInvestments]
+      console.log('📦 Total inversiones combinadas:', allInvestments.length)
       // Eliminar duplicados por ID
       const uniqueInvestments = allInvestments.filter((inv, index, self) => 
         index === self.findIndex(i => i.id === inv.id)
       )
+      console.log('📦 Inversiones únicas:', uniqueInvestments.length)
       
       const activeInvestment = uniqueInvestments.find(inv => 
         inv.status === 'pendiente_verificacion' || inv.status === 'activo'
       )
+      console.log('📦 Pack activo encontrado:', activeInvestment ? `${activeInvestment.packType} (${activeInvestment.status})` : 'Ninguno')
+      console.log('📦 Detalles del pack activo:', activeInvestment)
       setInvestment(activeInvestment)
 
       // Load referrals count
@@ -210,7 +219,20 @@ const Dashboard = () => {
       // Generate performance data based on real investments and activities
       generatePerformanceData(uniqueInvestments, userActivities)
     } catch (error) {
-      console.error('Error loading dashboard data:', error)
+      console.error('❌ ERROR CRÍTICO en loadDashboardData:', error)
+      console.error('❌ Stack trace:', error.stack)
+      // Asegurar que al menos los datos básicos se carguen
+      try {
+        const localInvestments = await secureStorage.getItem('investments') || []
+        const localUserInvestments = localInvestments.filter(inv => inv.userId === user?.id)
+        const activeInvestment = localUserInvestments.find(inv => 
+          inv.status === 'pendiente_verificacion' || inv.status === 'activo'
+        )
+        setInvestment(activeInvestment)
+        console.log('📦 Pack recuperado desde IndexedDB como fallback:', activeInvestment ? activeInvestment.packType : 'Ninguno')
+      } catch (fallbackError) {
+        console.error('❌ Error en fallback también:', fallbackError)
+      }
     }
   }
 
