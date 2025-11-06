@@ -112,21 +112,13 @@ const Dashboard = () => {
       setInvestment(activeInvestment)
 
       // Load referrals count
-      // Cargar desde IndexedDB
-      const allUsers = await secureStorage.getItem('users') || []
+      // PRIORIZAR SUPABASE como fuente única de verdad
       let referralCode = (user?.referral_code || user?.referralCode || '').trim().toUpperCase()
-      const localReferrals = allUsers.filter(u => {
-        const refBy = (u.referredBy || '').trim().toUpperCase()
-        return refBy === referralCode
-      })
-      
-      console.log('📋 Referidos desde IndexedDB:', localReferrals.length)
-      
-      // Cargar desde Supabase también (reutilizando supabaseUrl ya declarada)
-      let supabaseReferrals = []
+      let finalReferrals = []
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_KEY || ''
       console.log('🔑 Supabase Anon Key configurada:', !!supabaseAnonKey, supabaseAnonKey ? 'Sí' : 'No')
       
+      // Intentar cargar desde Supabase primero (fuente única de verdad)
       if (supabaseUrl && !supabaseUrl.includes('placeholder') && supabaseAnonKey && !supabaseAnonKey.includes('placeholder') && user?.id && referralCode) {
         try {
           const { createClient } = await import('@supabase/supabase-js')
@@ -196,50 +188,58 @@ const Dashboard = () => {
           
           if (supabaseUsers && supabaseUsers.length > 0) {
             // Mapear formato Supabase a formato local
-            supabaseReferrals = supabaseUsers.map(u => ({
+            finalReferrals = supabaseUsers.map(u => ({
               id: u.id,
               name: u.name || u.email || 'Usuario sin nombre', // Manejar name NULL
               email: u.email || 'Sin email',
               referredBy: u.referred_by,
               createdAt: u.created_at || new Date().toISOString()
             }))
-            console.log('✅ Referidos encontrados en Supabase:', supabaseReferrals.length)
-            console.log('📝 Detalles de referidos:', supabaseReferrals)
+            console.log('✅ Referidos encontrados en Supabase (fuente única):', finalReferrals.length)
+            console.log('📝 Detalles de referidos:', finalReferrals)
           } else {
             console.log('ℹ️ No se encontraron referidos en Supabase con código:', referralCode)
+            finalReferrals = []
           }
         } catch (error) {
           console.error('❌ Error loading referrals from Supabase:', error)
           if (error.message?.includes('supabaseKey is required') || error.message?.includes('supabaseUrl is required')) {
             console.warn('⚠️ Variables de entorno de Supabase no configuradas en Netlify. Ve a Netlify Dashboard → Site settings → Environment variables y agrega VITE_SUPABASE_ANON_KEY')
           }
+          finalReferrals = []
         }
       } else {
-        console.log('ℹ️ Supabase no configurado o datos faltantes:', {
+        console.log('ℹ️ Supabase no configurado o datos faltantes. Usando IndexedDB como fallback:', {
           hasUrl: !!supabaseUrl,
           hasUserId: !!user?.id,
           referralCode
         })
+        
+        // FALLBACK: Solo usar IndexedDB si Supabase no está disponible
+        const allUsers = await secureStorage.getItem('users') || []
+        finalReferrals = allUsers.filter(u => {
+          const refBy = (u.referredBy || '').trim().toUpperCase()
+          return refBy === referralCode
+        }).map(u => ({
+          id: u.id,
+          name: u.name || u.email || 'Usuario sin nombre',
+          email: u.email || 'Sin email',
+          referredBy: u.referredBy,
+          createdAt: u.createdAt || new Date().toISOString()
+        }))
+        console.log('📋 Referidos desde IndexedDB (fallback):', finalReferrals.length)
       }
       
-      // Combinar referidos de ambas fuentes
-      const allReferrals = [...supabaseReferrals, ...localReferrals]
-      // Eliminar duplicados por ID
-      const uniqueReferrals = allReferrals.filter((ref, index, self) => 
-        index === self.findIndex(r => r.id === ref.id)
-      )
-      
+      // Usar solo los referidos de Supabase (o fallback de IndexedDB si Supabase no está disponible)
       console.log('📊 RESUMEN FINAL DE REFERIDOS:')
-      console.log('  - Desde Supabase:', supabaseReferrals.length)
-      console.log('  - Desde IndexedDB:', localReferrals.length)
-      console.log('  - Total combinado:', allReferrals.length)
-      console.log('  - Después de eliminar duplicados:', uniqueReferrals.length)
-      console.log('  - Lista final:', uniqueReferrals)
+      console.log('  - Total referidos:', finalReferrals.length)
+      console.log('  - Fuente: Supabase (priorizada como única fuente de verdad)')
+      console.log('  - Lista final:', finalReferrals)
       
-      setReferralCount(uniqueReferrals.length)
-      setReferralsList(uniqueReferrals)
+      setReferralCount(finalReferrals.length)
+      setReferralsList(finalReferrals)
       
-      console.log('✅ Estados actualizados - referralCount:', uniqueReferrals.length, 'referralsList:', uniqueReferrals.length)
+      console.log('✅ Estados actualizados - referralCount:', finalReferrals.length, 'referralsList:', finalReferrals.length)
 
       // Load activities
       const allActivities = await secureStorage.getItem('activities') || []
