@@ -126,7 +126,7 @@ const Dashboard = () => {
       // PRIORIZAR SUPABASE como fuente única de verdad
       let referralCode = (user?.referral_code || user?.referralCode || '').trim().toUpperCase()
       let finalReferrals = []
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_KEY || ''
+      // supabaseAnonKey ya está declarado al inicio de la función
       console.log('🔑 Supabase Anon Key configurada:', !!supabaseAnonKey, supabaseAnonKey ? 'Sí' : 'No')
       
       // Intentar cargar desde Supabase primero (fuente única de verdad)
