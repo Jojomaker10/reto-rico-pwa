@@ -29,6 +29,8 @@ const Withdrawals = () => {
   
   const [errors, setErrors] = useState({})
   const [showInfo, setShowInfo] = useState(false)
+  const [successMsg, setSuccessMsg] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
 
   const MIN_WITHDRAWAL = 10000
 
@@ -106,8 +108,17 @@ const Withdrawals = () => {
 
     if (!formData.usdtAddress) {
       newErrors.usdtAddress = 'La dirección USDT es requerida'
-    } else if (formData.usdtAddress.length < 26) {
-      newErrors.usdtAddress = 'Dirección USDT inválida'
+    } else {
+      // Validar formato de dirección USDT (TRC20 o ERC20)
+      const trimmedAddress = formData.usdtAddress.trim()
+      const isTRC20 = trimmedAddress.startsWith('T') && trimmedAddress.length >= 34
+      const isERC20 = trimmedAddress.startsWith('0x') && trimmedAddress.length === 42
+      
+      if (!isTRC20 && !isERC20) {
+        newErrors.usdtAddress = 'Dirección USDT inválida. Debe ser TRC20 (comienza con T) o ERC20 (comienza con 0x)'
+      } else if (trimmedAddress.length < 26) {
+        newErrors.usdtAddress = 'Dirección USDT muy corta'
+      }
     }
 
     // Check for pending withdrawals
@@ -150,28 +161,44 @@ const Withdrawals = () => {
 
       if (error) {
         console.error('Error creating withdrawal:', error)
-        alert('Error al crear la solicitud de retiro')
+        setErrorMsg('Error al crear la solicitud de retiro. Por favor, intenta de nuevo.')
+        setTimeout(() => setErrorMsg(''), 5000)
         setLoading(false)
         return
       }
 
-      // Update user balance
-      await supabase
+      // Update user balance con verificación
+      const { error: updateError } = await supabase
         .from('profiles')
         .update({ balance: user.balance - amount })
         .eq('id', user.id)
 
-      // Reload withdrawals and user
+      if (updateError) {
+        console.error('Error updating balance:', updateError)
+        setErrorMsg('Error al actualizar el balance. Por favor, intenta de nuevo.')
+        setTimeout(() => setErrorMsg(''), 5000)
+        setLoading(false)
+        return
+      }
+
+      // Actualizar el estado del usuario en el store
+      const updatedUser = { ...user, balance: user.balance - amount }
+      useAuthStore.setState({ user: updatedUser })
+
+      // Reload withdrawals
       await loadWithdrawals()
       
       // Reset form
       setFormData({ amount: '', usdtAddress: '' })
       setErrors({})
       
-      alert('✅ Solicitud de retiro enviada correctamente')
+      // Mostrar mensaje de éxito
+      setSuccessMsg('✅ Solicitud de retiro enviada correctamente')
+      setTimeout(() => setSuccessMsg(''), 5000)
     } catch (error) {
       console.error('Error:', error)
-      alert('Error al procesar la solicitud')
+      setErrorMsg('Error al procesar la solicitud. Por favor, intenta de nuevo.')
+      setTimeout(() => setErrorMsg(''), 5000)
     } finally {
       setLoading(false)
     }
@@ -306,6 +333,18 @@ const Withdrawals = () => {
                   <li>• Tiempo de procesamiento: 2-5 días hábiles</li>
                   <li>• No puedes tener más de un retiro pendiente</li>
                 </ul>
+              </div>
+            )}
+
+            {successMsg && (
+              <div className="mb-4 p-4 bg-green-500/20 border border-green-500/30 rounded-xl">
+                <p className="text-green-200 text-sm">{successMsg}</p>
+              </div>
+            )}
+
+            {errorMsg && (
+              <div className="mb-4 p-4 bg-red-500/20 border border-red-500/30 rounded-xl">
+                <p className="text-red-200 text-sm">{errorMsg}</p>
               </div>
             )}
 

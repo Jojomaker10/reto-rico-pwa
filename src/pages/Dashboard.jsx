@@ -38,6 +38,7 @@ const Dashboard = () => {
     try {
       // Obtener URL de Supabase una sola vez
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_KEY || ''
       console.log('🔗 Supabase URL configurada:', !!supabaseUrl, supabaseUrl ? 'Sí' : 'No')
       
       // Cargar inversiones de IndexedDB
@@ -48,14 +49,24 @@ const Dashboard = () => {
       
       // Intentar cargar de Supabase también
       let supabaseInvestments = []
-      if (supabaseUrl && !supabaseUrl.includes('placeholder') && user?.id) {
+      if (supabaseUrl && !supabaseUrl.includes('placeholder') && supabaseAnonKey && !supabaseAnonKey.includes('placeholder') && user?.id) {
         try {
           console.log('📦 Intentando cargar inversiones desde Supabase...')
-          const { getInvestments } = useAuthStore.getState()
-          const supabaseData = await getInvestments()
+          // Usar supabase directamente para evitar problemas de reactividad
+          const { createClient } = await import('@supabase/supabase-js')
+          const supabaseClient = createClient(supabaseUrl, supabaseAnonKey)
+          const { data: supabaseData, error: invError } = await supabaseClient
+            .from('investments')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+          
+          if (invError) {
+            console.warn('⚠️ Error loading investments from Supabase:', invError)
+          }
           console.log('📦 Datos desde Supabase:', supabaseData?.length || 0)
           // Mapear formato Supabase a formato local
-          supabaseInvestments = (supabaseData || []).map(inv => ({
+          supabaseInvestments = ((supabaseData && Array.isArray(supabaseData)) ? supabaseData : []).map(inv => ({
             id: inv.id,
             userId: inv.user_id,
             packType: inv.pack_type,
@@ -73,7 +84,7 @@ const Dashboard = () => {
       }
       
       // SINCRONIZACIÓN: Eliminar de IndexedDB los packs que ya no existen en Supabase
-      if (supabaseUrl && !supabaseUrl.includes('placeholder') && supabaseInvestments.length >= 0 && user?.id) {
+      if (supabaseUrl && !supabaseUrl.includes('placeholder') && supabaseAnonKey && !supabaseAnonKey.includes('placeholder') && supabaseInvestments.length >= 0 && user?.id) {
         const supabaseIds = new Set(supabaseInvestments.map(inv => inv.id))
         const investmentsToKeep = localInvestments.filter(inv => {
           // Si el pack NO es del usuario actual, mantenerlo siempre
@@ -530,7 +541,7 @@ const Dashboard = () => {
             </div>
             <h3 className="text-sm text-gray-400 mb-1">Balance Total</h3>
             <p className="text-3xl font-black gradient-text">
-              {(user.balance_usd || 0).toFixed(2)} USD
+              {(user.balance || user.balance_usd || 0).toFixed(2)} USD
             </p>
             <p className="text-xs text-gray-500 mt-1">Equivalente a USDT</p>
             <div className="mt-4">
@@ -574,7 +585,7 @@ const Dashboard = () => {
             </div>
             <h3 className="text-sm text-gray-400 mb-1">Total Ganado</h3>
             <p className="text-3xl font-black text-gold">
-              +{Number(user.earnings_usd || 0).toFixed(2)} USD
+              +{Number(user.earnings || user.earnings_usd || 0).toFixed(2)} USD
             </p>
             <p className="text-xs text-gray-500 mt-1">Equivalente</p>
           </div>

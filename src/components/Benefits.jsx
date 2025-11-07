@@ -23,12 +23,13 @@ const Benefits = () => {
         
         // Intentar cargar desde Supabase también
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
-        if (supabaseUrl && !supabaseUrl.includes('placeholder')) {
+        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_KEY || ''
+        if (supabaseUrl && !supabaseUrl.includes('placeholder') && supabaseAnonKey && !supabaseAnonKey.includes('placeholder')) {
           try {
             const { createClient } = await import('@supabase/supabase-js')
             const supabase = createClient(
               supabaseUrl,
-              import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+              supabaseAnonKey
             )
             
             // Obtener usuarios activos

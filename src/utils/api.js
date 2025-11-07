@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // Obtener URL base de Supabase Edge Functions
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || ''
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_KEY || ''
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_KEY || ''
 
 // Determinar si estamos en desarrollo o producción
 const isDev = import.meta.env.DEV

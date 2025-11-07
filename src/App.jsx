@@ -18,6 +18,7 @@ import Cookies from './pages/Cookies'
 import Legal from './pages/Legal'
 import Claims from './pages/Claims'
 import ProtectedRoute from './components/ProtectedRoute'
+import AdminProtectedRoute from './components/AdminProtectedRoute'
 import InstallPrompt from './components/InstallPrompt'
 
 function App() {
@@ -59,14 +60,14 @@ function App() {
           path="/withdrawals"
           element={
             <ProtectedRoute>
-              <Withdraw />
+              <Withdrawals />
             </ProtectedRoute>
           }
         />
         <Route path="/deposit" element={<ProtectedRoute><Deposit /></ProtectedRoute>} />
         <Route path="/withdraw" element={<ProtectedRoute><Withdraw /></ProtectedRoute>} />
         <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
-        <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
         <Route path="/about" element={<About />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />

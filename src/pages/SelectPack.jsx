@@ -129,18 +129,30 @@ const SelectPack = () => {
 
       // También guardar en Supabase si está configurado
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
-      if (supabaseUrl && !supabaseUrl.includes('placeholder') && user?.id) {
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_KEY || ''
+      if (supabaseUrl && !supabaseUrl.includes('placeholder') && supabaseAnonKey && !supabaseAnonKey.includes('placeholder') && user?.id) {
         try {
-          const { saveInvestment } = useAuthStore.getState()
-          await saveInvestment({
-            user_id: user.id,
-            pack_type: activePack.type,
-            amount: activePack.amount,
-            status: 'pendiente_verificacion',
-            payment_method: paymentData.paymentMethod,
-            tx_hash: paymentData.txHash || null,
-            created_at: new Date().toISOString()
-          })
+          const { createClient } = await import('@supabase/supabase-js')
+          const supabaseClient = createClient(supabaseUrl, supabaseAnonKey)
+          const { data, error } = await supabaseClient
+            .from('investments')
+            .insert([{
+              user_id: user.id,
+              pack_type: activePack.type,
+              amount: activePack.amount,
+              status: 'pendiente_verificacion',
+              payment_method: paymentData.paymentMethod,
+              tx_hash: paymentData.txHash || null,
+              created_at: new Date().toISOString()
+            }])
+            .select()
+            .single()
+          
+          if (error) {
+            console.warn('Error saving to Supabase, using local storage only:', error)
+          } else {
+            console.log('✅ Inversión guardada en Supabase:', data)
+          }
         } catch (supabaseError) {
           console.warn('Error saving to Supabase, using local storage only:', supabaseError)
         }

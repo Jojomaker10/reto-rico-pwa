@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import QRCode from 'qrcode'
 import api from '../utils/api'
 import useAuthStore from '../store/authStoreSupabase'
+import NavBar from '../components/NavBar'
 
 export default function Deposit() {
+  const navigate = useNavigate()
   const { user, isAuthenticated, init } = useAuthStore()
   const [address, setAddress] = useState('')
   const [qr, setQr] = useState('')
@@ -16,11 +19,16 @@ export default function Deposit() {
     ;(async () => {
       try {
         await init()
+        if (!isAuthenticated) {
+          navigate('/login')
+          return
+        }
       } catch {}
     })()
-  }, [init])
+  }, [init, isAuthenticated, navigate])
 
   useEffect(() => {
+    if (!isAuthenticated) return
     ;(async () => {
       try {
         setLoading(true)
@@ -42,11 +50,27 @@ export default function Deposit() {
     })()
   }, [isAuthenticated, user])
 
+  if (!isAuthenticated) {
+    return null
+  }
+
   return (
-    <div className="p-6 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Depositar USDT (TRC20)</h1>
-      {loading && <p>Cargando...</p>}
-      {error && <p className="text-red-400">{error}</p>}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      <NavBar />
+      <div className="pt-24 pb-20 px-4">
+        <div className="max-w-xl mx-auto">
+          <h1 className="text-2xl font-bold mb-4">Depositar USDT (TRC20)</h1>
+      {loading && (
+        <div className="text-center py-8">
+          <div className="animate-spin w-12 h-12 border-4 border-green-money border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-gray-400">Cargando...</p>
+        </div>
+      )}
+      {error && (
+        <div className="p-4 bg-red-500/20 border border-red-500/30 rounded-xl mb-4">
+          <p className="text-red-200 text-sm">{error}</p>
+        </div>
+      )}
       {address && (
         <div className="space-y-4">
           {qr && <img src={qr} alt="QR" className="w-48 h-48" />}
@@ -74,10 +98,16 @@ export default function Deposit() {
             >
               Confirmar depósito
             </button>
-            {msg && <p className="text-emerald-400">{msg}</p>}
+            {msg && (
+              <div className="p-4 bg-green-500/20 border border-green-500/30 rounded-xl">
+                <p className="text-green-200 text-sm">{msg}</p>
+              </div>
+            )}
           </div>
         </div>
       )}
+        </div>
+      </div>
     </div>
   )
 }
